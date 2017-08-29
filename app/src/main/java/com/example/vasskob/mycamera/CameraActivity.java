@@ -5,14 +5,17 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.nabinbhandari.android.permissions.PermissionHandler;
@@ -22,22 +25,36 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+import static android.hardware.Camera.Parameters.FLASH_MODE_AUTO;
+import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
+import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
+import static android.hardware.Camera.Parameters.FLASH_MODE_TORCH;
 
 
 public class CameraActivity extends Activity {
 
     @BindView(R.id.main_container)
     ViewGroup mRootView;
+
     @BindView(R.id.camera_preview)
     ViewGroup preview;
 
-    private static final long UI_ANIMATION_DELAY = 1000;
+    @BindView(R.id.btn_flash)
+    Button btnFlash;
+
     private static final String TAG = CameraActivity.class.getSimpleName();
+    private static final long UI_ANIMATION_DELAY = 1000;
 
     private final Handler mHideHandler = new Handler();
+    private final Handler switchFlashHandler = new Handler();
     private Camera mCamera;
     private CameraPreview mPreview;
     private View decorView;
+    private Camera.Parameters params;
+    private Drawable background;
+    private String flashMode;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,13 +63,12 @@ public class CameraActivity extends Activity {
         ButterKnife.bind(this);
 
         makeActivityFullScreen();
-        Log.d(TAG, "onCreate: ");
         checkPermissions();
     }
 
     protected void makeActivityFullScreen() {
         decorView = getWindow().getDecorView();
-        makeFullScreen();
+        makeUiInvisible();
         decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
             @Override
             public void onSystemUiVisibilityChange(int visibility) {
@@ -68,7 +84,7 @@ public class CameraActivity extends Activity {
         }
     }
 
-    private void makeFullScreen() {
+    private void makeUiInvisible() {
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -79,92 +95,96 @@ public class CameraActivity extends Activity {
         @SuppressLint("InlinedApi")
         @Override
         public void run() {
-            makeFullScreen();
+            makeUiInvisible();
+        }
+    };
+
+    private final Runnable switchFlashMode = new Runnable() {
+        @SuppressLint("InlinedApi")
+        @Override
+        public void run() {
+            btnFlash.setBackground(background);
+            params = mCamera.getParameters();
+            params.setFlashMode(flashMode);
+            mCamera.setParameters(params);
         }
     };
 
     private void addCameraPreview() {
-        // Create an instance of Camera
         mCamera = getCameraInstance();
-        setCameraDisplayOrientation(Camera.getNumberOfCameras() - 1, mCamera);
-        setCameraAutoFocus(mCamera);
-        //     setFaceDetection(mCamera);
+        mCamera.setDisplayOrientation(90);
+        setCameraAutoFocus();
+        setCameraDefaultFlashMode();
+        Log.d(TAG, "setCameraDefaultFlashMode: " + mCamera.getParameters().getSupportedFlashModes());
 
-        // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
         preview.addView(mPreview);
-        Log.d(TAG, "addCameraPreview: ");
     }
 
-//    private void setFaceDetection(Camera mCamera) {
-//        mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
-//            @Override
-//            public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-//
-//            }
-//        });
-//        Camera.Parameters params = mCamera.getParameters();
-//
-//        // start face detection only *after* preview has started
-//        if (params.getMaxNumDetectedFaces() > 0){
-//            // camera supports face detection, so can start it:
-//            mCamera.startFaceDetection();
-//        }
-//    }
+    private void setCameraDefaultFlashMode() {
+        params = mCamera.getParameters();
+        if (params.getSupportedFlashModes().contains(FLASH_MODE_AUTO)) {
+            params.setFlashMode(FLASH_MODE_AUTO);
+        }
+        mCamera.setParameters(params);
+    }
 
-    private void setCameraAutoFocus(Camera c) {
-        Camera.Parameters params = c.getParameters();
+    private void setCameraAutoFocus() {
+        params = mCamera.getParameters();
         if (params.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
-        c.setParameters(params);
+        mCamera.setParameters(params);
     }
 
     private Camera getCameraInstance() {
         Camera c = null;
         try {
-            c = Camera.open(Camera.getNumberOfCameras() - 1); // attempt to get a Camera instance
+            c = Camera.open(0);
         } catch (Exception e) {
-            // Camera is not available (in use or does not exist)
             Toast.makeText(this, getString(R.string.cameraWarn), Toast.LENGTH_SHORT).show();
             Log.e(TAG, "getCameraInstance: ", e);
         }
-        return c; // returns null if camera is unavailable
+        return c;
     }
 
-    public void setCameraDisplayOrientation(int cameraId, android.hardware.Camera camera) {
+    private int clickCounter = 1;
 
-        android.hardware.Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
+    @OnClick(R.id.btn_flash)
+    protected void changeFlashMode() {
+        background = ContextCompat.getDrawable(this, R.drawable.ic_flash_auto);
+        flashMode = Camera.Parameters.FLASH_MODE_AUTO;
+        params = mCamera.getParameters();
 
-        android.hardware.Camera.getCameraInfo(cameraId, info);
-
-        int rotation = getWindowManager().getDefaultDisplay().getRotation();
-        int degrees = 0;
-
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                degrees = 0;
+        clickCounter++;
+        switch (clickCounter) {
+            case 1:
+                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_auto);
+                flashMode = FLASH_MODE_AUTO;
                 break;
-            case Surface.ROTATION_90:
-                degrees = 90;
+            case 2:
+                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_on);
+                flashMode = FLASH_MODE_ON;
                 break;
-            case Surface.ROTATION_180:
-                degrees = 180;
+            case 3:
+                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_off);
+                flashMode = FLASH_MODE_OFF;
                 break;
-            case Surface.ROTATION_270:
-                degrees = 270;
+            case 4:
+                if (getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_CAMERA_FLASH)) {
+                    flashMode = FLASH_MODE_TORCH;
+                }
+                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_torch);
+                clickCounter = 0;
                 break;
         }
 
-        int result;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
-        } else {  // back-facing
-            result = (info.orientation - degrees + 360) % 360;
+        if (!flashMode.equals(FLASH_MODE_TORCH)) {
+            params.setFlashMode(FLASH_MODE_OFF);
+            mCamera.setParameters(params);
         }
-        camera.setDisplayOrientation(result);
+        switchFlashHandler.postDelayed(switchFlashMode, 100);
     }
 
     @Override
@@ -196,7 +216,6 @@ public class CameraActivity extends Activity {
             mCamera.release();
             mCamera = null;
             mPreview = null;
-
         }
     }
 
