@@ -14,6 +14,9 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 public class CameraUtils {
 
+    public static final String PHOTO_PATH = "PHOTO_PATH";
+    public static final int FOCUS_VIEW_HEIGHT = 100;
+
     private static final String TAG = CameraUtils.class.getSimpleName();
 
     public static Camera getCameraInstance(int cameraId) {

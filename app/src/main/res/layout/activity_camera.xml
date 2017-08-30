@@ -4,9 +4,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_container"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@android:color/black">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="w,4:3">
+
+        <FrameLayout
+            android:id="@+id/camera_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <com.example.vasskob.mycamera.FocusView
+            android:id="@+id/focus_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </FrameLayout>
 
     <Button
         android:id="@+id/btn_flash"
@@ -17,12 +33,6 @@
         android:background="@drawable/ic_flash_auto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
-
-    <FrameLayout
-        android:id="@+id/camera_preview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="w,4:3"/>
 
     <ImageView
         android:id="@+id/btn_camera_switch"
@@ -61,5 +71,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:src="@drawable/picture"/>
-
 </android.support.constraint.ConstraintLayout>

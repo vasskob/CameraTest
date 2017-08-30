@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +19,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -52,6 +54,7 @@ import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
 import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
 import static android.hardware.Camera.Parameters.FLASH_MODE_TORCH;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+import static com.example.vasskob.mycamera.utils.CameraUtils.PHOTO_PATH;
 
 
 public class CameraActivity extends Activity implements Camera.PictureCallback, Camera.ShutterCallback {
@@ -68,6 +71,9 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     @BindView(R.id.iv_thumbnail)
     CircularImageView ivThumbnail;
 
+    @BindView(R.id.focus_view)
+    FocusView focusView;
+
     private static final String TAG = CameraActivity.class.getSimpleName();
     private static final long UI_ANIMATION_DELAY = 1000;
 
@@ -80,6 +86,9 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     private Drawable background;
     private String flashMode;
     private SensorManager sensorManager;
+    private PowerManager.WakeLock wakeLock;
+    private File pictureFile;
+    private boolean frontCameraOn;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -88,7 +97,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         ButterKnife.bind(this);
 
         makeActivityFullScreen();
-        checkPermissions(0);
     }
 
     protected void makeActivityFullScreen() {
@@ -136,23 +144,47 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     };
 
     private void addCameraPreview(int cameraId) {
+        Log.d(TAG, "addCameraPreview: ");
         mCamera = CameraUtils.getCameraInstance(cameraId);
         if (mCamera == null) {
             Toast.makeText(this, getString(R.string.cameraWarn), Toast.LENGTH_SHORT).show();
             return;
         }
         mCamera.setDisplayOrientation(90);
+
         if (mCamera.getParameters().getSupportedFlashModes() == null) {
             btnFlash.setVisibility(View.GONE);
         } else {
             btnFlash.setVisibility(View.VISIBLE);
         }
-        setCameraAutoFocus();
+        //setCameraAutoFocus();
         setCameraDefaultFlashMode();
-        Log.d(TAG, "setCameraDefaultFlashMode: " + mCamera.getParameters().getSupportedFlashModes());
 
         mPreview = new CameraPreview(this, mCamera);
+        mPreview.setFocusView(focusView);
         preview.addView(mPreview);
+
+        startWakeLock();
+    }
+
+    private static final String WAKE_LOCK_TAG = "TORCH_WAKE_LOCK";
+
+    private void startWakeLock() {
+        if (wakeLock == null) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm != null) {
+                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);
+            }
+        }
+        wakeLock.acquire(5 * 60 * 1000L /*5 minutes*/);
+        Log.d(TAG, "WakeLock acquired");
+    }
+
+    private void stopWakeLock() {
+        if (wakeLock != null) {
+            wakeLock.release();
+            Log.d(TAG, "WakeLock released");
+        }
     }
 
     private void setCameraDefaultFlashMode() {
@@ -161,6 +193,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
             params.setFlashMode(FLASH_MODE_AUTO);
         }
         mCamera.setParameters(params);
+        btnFlash.setBackground(ContextCompat.getDrawable(this, R.drawable.ic_flash_auto));
     }
 
     private void setCameraAutoFocus() {
@@ -170,7 +203,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         }
         mCamera.setParameters(params);
     }
-
 
     private int clickCounter = 1;
 
@@ -211,15 +243,20 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         switchHandler.postDelayed(switchFlashMode, 100);
     }
 
+    @OnClick(R.id.iv_thumbnail)
+    protected void onThumbnailClick() {
+        if (pictureFile != null) {
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra(PHOTO_PATH, pictureFile.getAbsolutePath());
+            startActivity(intent);
+        }
+    }
+
     @OnClick(R.id.btn_capture)
     protected void onCaptureBtnClick() {
         mCamera.takePicture(this, null, this);
         getOrientation();
 
-    }
-
-    private void removeListener() {
-        sensorManager.unregisterListener(listener);
     }
 
     public void getOrientation() {
@@ -233,7 +270,8 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.values[1] < 6.5 && event.values[1] > -6.5) {
+            Log.d(TAG, "onSensorChanged: eventValue " + event.values[1]);
+            if (event.values[1] < 4.5 && event.values[1] > -4.5) {
                 if (orientation != 1) {
                     Log.d("Sensor", "Landscape");
                     screenOrientation = 1;
@@ -250,13 +288,15 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            // TODO Auto-generated method stub
 
         }
     };
 
-    private int screenOrientation;
+    private void removeListener() {
+        sensorManager.unregisterListener(listener);
+    }
 
+    private int screenOrientation;
 
     @BindView(R.id.btn_camera_switch)
     ImageView ivCameraSwitch;
@@ -274,9 +314,11 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
                 checkPermissions(switchCounter);
             }
         }, 200);
+        Log.d(TAG, "onSwitchCameraClick: numberOfCameras = " + Camera.getNumberOfCameras());
         if (switchCounter == Camera.getNumberOfCameras()) {
             switchCounter = 0;
         }
+        frontCameraOn = switchCounter == Camera.getNumberOfCameras() - 1;
     }
 
     @Override
@@ -289,7 +331,8 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     protected void onResume() {
         super.onResume();
         if (mCamera == null) {
-            checkPermissions(0);
+            Log.d(TAG, "onResume: ");
+            checkPermissions(switchCounter);
         }
     }
 
@@ -300,6 +343,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     }
 
     private void releaseCamera() {
+        stopWakeLock();
         if (mCamera != null) {
             mCamera.setPreviewCallbackWithBuffer(null);
             preview.removeView(mPreview);
@@ -313,17 +357,21 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        File pictureFile = CameraUtils.getOutputMediaFile(MEDIA_TYPE_IMAGE);
+        pictureFile = CameraUtils.getOutputMediaFile(MEDIA_TYPE_IMAGE);
         if (pictureFile == null) {
             Log.d(TAG, "Error creating media file, check storage permissions: ");
             return;
         }
         try {
+            int rotateDegree;
             FileOutputStream fos = new FileOutputStream(pictureFile);
             Bitmap realImage = BitmapFactory.decodeByteArray(data, 0, data.length);
-            Log.d(TAG, "onCaptureBtnClick: orientation = " + screenOrientation);
+            Log.d(TAG, "onCaptureBtnClick: screenOrientation!!! = " + screenOrientation);
             if (screenOrientation == 0) {
-                realImage = rotate(realImage, -90);
+                if (frontCameraOn) {
+                    rotateDegree = -90;
+                } else rotateDegree = 90;
+                realImage = rotate(realImage, rotateDegree);
             }
             realImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.close();
@@ -343,7 +391,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         int h = bitmap.getHeight();
 
         Matrix mtx = new Matrix();
-        //       mtx.postRotate(degree);
         mtx.setRotate(degree);
 
         return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
@@ -364,8 +411,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
                         return false;
                     }
                 })
-                .into(ivThumbnail)
-                .onLoadFailed(ContextCompat.getDrawable(this, R.drawable.picture));
+                .into(ivThumbnail);
     }
 
     @Override
