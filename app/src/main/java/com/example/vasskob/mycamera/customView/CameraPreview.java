@@ -1,4 +1,4 @@
-package com.example.vasskob.mycamera;
+package com.example.vasskob.mycamera.customView;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -18,7 +18,6 @@ import static com.example.vasskob.mycamera.utils.CameraUtils.FOCUS_VIEW_HEIGHT;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getSimpleName();
-    private static final double ASPECT_RATIO = 3.0 / 4.0;
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private FocusView focusView;
@@ -36,20 +35,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-
-        if (width > height * ASPECT_RATIO) {
-            width = (int) (height * ASPECT_RATIO + .5);
-        } else {
-            height = (int) (width / ASPECT_RATIO + .5);
-        }
-
-        setMeasuredDimension(width, height);
-    }
-
     public void surfaceCreated(SurfaceHolder holder) {
         setupCamera();
         // The Surface has been created, now tell the camera where to draw the preview.
@@ -63,47 +48,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void setupCamera() {
         Camera.Parameters parameters = mCamera.getParameters();
+        List<Camera.Size> list = parameters.getSupportedPreviewSizes();
+        for (Camera.Size item : list) {
+            Log.d(TAG, "setupCamera: Width= " + item.width + ", Height = " + item.height + "\n");
+        }
 
-        Camera.Size bestPreviewSize = determineBestPreviewSize(parameters);
-        Camera.Size bestPictureSize = determineBestPictureSize(parameters);
-
-        parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
-        parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
-
+        parameters.setPreviewSize(1280, 960);
+        // parameters.setPictureSize(640, 480);
         mCamera.setParameters(parameters);
-    }
-
-    private static final int PICTURE_SIZE_MAX_WIDTH = 1280;
-    private static final int PREVIEW_SIZE_MAX_WIDTH = 640;
-
-    private Camera.Size determineBestPreviewSize(Camera.Parameters parameters) {
-        List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
-        return determineBestSize(sizes, PREVIEW_SIZE_MAX_WIDTH);
-    }
-
-    private Camera.Size determineBestPictureSize(Camera.Parameters parameters) {
-        List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
-        return determineBestSize(sizes, PICTURE_SIZE_MAX_WIDTH);
-    }
-
-    protected Camera.Size determineBestSize(List<Camera.Size> sizes, int widthThreshold) {
-        Camera.Size bestSize = null;
-        for (Camera.Size currentSize : sizes) {
-            boolean isDesiredRatio = (currentSize.width / 4) == (currentSize.height / 3);
-            boolean isBetterSize = (bestSize == null || currentSize.width > bestSize.width);
-            boolean isInBounds = currentSize.width <= PICTURE_SIZE_MAX_WIDTH;
-
-            if (isDesiredRatio && isInBounds && isBetterSize) {
-                bestSize = currentSize;
-            }
-        }
-
-        if (bestSize == null) {
-            // listener.onCameraError();
-            return sizes.get(0);
-        }
-
-        return bestSize;
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {

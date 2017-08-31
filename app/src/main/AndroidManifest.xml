@@ -12,7 +12,6 @@
     <uses-feature android:name="android.hardware.camera.flash"/>
     <uses-feature android:name="android.hardware.camera"/>
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,22 +19,32 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".CameraActivity"
+            android:name=".screens.CameraActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".DetailActivity"
+            android:name=".screens.PhotoViewerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="detail"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme">
+        </activity>
+        <activity
+            android:name=".screens.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".screens.CameraActivity"
+            android:theme="@style/FullscreenSettingsTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.vasskob.mycamera.screens.CameraActivity"/>
         </activity>
     </application>
 

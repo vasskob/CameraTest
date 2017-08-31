@@ -20,4 +20,22 @@
         <item name="android:background">@color/black_overlay</item>
     </style>
 
+    <style name="ControlBtnStyle" parent="Base.Widget.AppCompat.Button">
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:background">@null</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="android:paddingStart">18dp</item>
+    </style>
+
+    <style name="FullscreenSettingsTheme" parent="@style/AppTheme">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@color/darker_gray</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+        <item name="android:textColorSecondary">@color/colorGray</item>
+    </style>
+
+
 </resources>

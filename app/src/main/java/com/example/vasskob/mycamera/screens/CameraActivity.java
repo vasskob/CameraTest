@@ -1,8 +1,7 @@
-package com.example.vasskob.mycamera;
+package com.example.vasskob.mycamera.screens;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +20,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +32,9 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.vasskob.mycamera.R;
+import com.example.vasskob.mycamera.customView.CameraPreview;
+import com.example.vasskob.mycamera.customView.FocusView;
 import com.example.vasskob.mycamera.utils.CameraUtils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.nabinbhandari.android.permissions.PermissionHandler;
@@ -75,19 +76,21 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     FocusView focusView;
 
     private static final String TAG = CameraActivity.class.getSimpleName();
-    private static final long UI_ANIMATION_DELAY = 1000;
+    private static final String WAKE_LOCK_TAG = "TORCH_WAKE_LOCK";
 
+    private static final long UI_ANIMATION_DELAY = 1000;
     private final Handler mHideHandler = new Handler();
     private final Handler switchHandler = new Handler();
     private Camera mCamera;
     private CameraPreview mPreview;
     private View decorView;
     private Camera.Parameters params;
-    private Drawable background;
+    private int background;
     private String flashMode;
     private SensorManager sensorManager;
     private PowerManager.WakeLock wakeLock;
     private File pictureFile;
+
     private boolean frontCameraOn;
 
     @Override
@@ -110,11 +113,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
                 }
             }
         });
-
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
     }
 
     private void makeUiInvisible() {
@@ -136,7 +134,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         @SuppressLint("InlinedApi")
         @Override
         public void run() {
-            btnFlash.setBackground(background);
+            btnFlash.setCompoundDrawablesWithIntrinsicBounds(0, 0, background, 0);
             params = mCamera.getParameters();
             params.setFlashMode(flashMode);
             mCamera.setParameters(params);
@@ -167,8 +165,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         startWakeLock();
     }
 
-    private static final String WAKE_LOCK_TAG = "TORCH_WAKE_LOCK";
-
     private void startWakeLock() {
         if (wakeLock == null) {
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -193,7 +189,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
             params.setFlashMode(FLASH_MODE_AUTO);
         }
         mCamera.setParameters(params);
-        btnFlash.setBackground(ContextCompat.getDrawable(this, R.drawable.ic_flash_auto));
+        btnFlash.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_flash_auto, 0);
     }
 
     private void setCameraAutoFocus() {
@@ -208,22 +204,22 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     @OnClick(R.id.btn_flash)
     protected void changeFlashMode() {
-        background = ContextCompat.getDrawable(this, R.drawable.ic_flash_auto);
+        background = R.drawable.ic_flash_auto;
         flashMode = Camera.Parameters.FLASH_MODE_AUTO;
         params = mCamera.getParameters();
 
         clickCounter++;
         switch (clickCounter) {
             case 1:
-                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_auto);
+                background = R.drawable.ic_flash_auto;
                 flashMode = FLASH_MODE_AUTO;
                 break;
             case 2:
-                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_on);
+                background = R.drawable.ic_flash_on;
                 flashMode = FLASH_MODE_ON;
                 break;
             case 3:
-                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_off);
+                background = R.drawable.ic_flash_off;
                 flashMode = FLASH_MODE_OFF;
                 break;
             case 4:
@@ -231,7 +227,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
                         PackageManager.FEATURE_CAMERA_FLASH)) {
                     flashMode = FLASH_MODE_TORCH;
                 }
-                background = ContextCompat.getDrawable(this, R.drawable.ic_flash_torch);
+                background = R.drawable.ic_flash_torch;
                 clickCounter = 0;
                 break;
         }
@@ -246,7 +242,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     @OnClick(R.id.iv_thumbnail)
     protected void onThumbnailClick() {
         if (pictureFile != null) {
-            Intent intent = new Intent(this, DetailActivity.class);
+            Intent intent = new Intent(this, PhotoViewerActivity.class);
             intent.putExtra(PHOTO_PATH, pictureFile.getAbsolutePath());
             startActivity(intent);
         }
@@ -265,6 +261,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     }
 
+    private int screenOrientation;
     private SensorEventListener listener = new SensorEventListener() {
         int orientation = -1;
 
@@ -296,8 +293,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         sensorManager.unregisterListener(listener);
     }
 
-    private int screenOrientation;
-
     @BindView(R.id.btn_camera_switch)
     ImageView ivCameraSwitch;
     private int switchCounter;
@@ -319,6 +314,11 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
             switchCounter = 0;
         }
         frontCameraOn = switchCounter == Camera.getNumberOfCameras() - 1;
+    }
+
+    @OnClick(R.id.btn_settings)
+    protected void onSettingsClick() {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     @Override
@@ -373,7 +373,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
                 } else rotateDegree = 90;
                 realImage = rotate(realImage, rotateDegree);
             }
-            realImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            realImage.compress(Bitmap.CompressFormat.JPEG, 30, fos);
             fos.close();
             removeListener();
             mCamera.startPreview();

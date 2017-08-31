@@ -8,6 +8,13 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
+    <Button
+        android:id="@+id/btn_settings"
+        style="@style/ControlBtnStyle"
+        android:drawableEnd="@drawable/ic_settings"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -18,19 +25,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <com.example.vasskob.mycamera.FocusView
+        <com.example.vasskob.mycamera.customView.FocusView
             android:id="@+id/focus_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </FrameLayout>
 
     <Button
         android:id="@+id/btn_flash"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/ic_flash_auto"
+        style="@style/ControlBtnStyle"
+        android:drawableEnd="@drawable/ic_flash_auto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
@@ -38,8 +42,6 @@
         android:id="@+id/btn_camera_switch"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
         android:layout_marginBottom="26dp"
         android:layout_marginStart="26dp"
         android:src="@drawable/front_back_switch_button_animation"

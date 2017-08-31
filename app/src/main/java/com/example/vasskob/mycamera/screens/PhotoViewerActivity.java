@@ -1,4 +1,4 @@
-package com.example.vasskob.mycamera;
+package com.example.vasskob.mycamera.screens;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.example.vasskob.mycamera.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -15,7 +16,7 @@ import butterknife.OnClick;
 import static com.example.vasskob.mycamera.utils.CameraUtils.PHOTO_PATH;
 
 
-public class DetailActivity extends Activity {
+public class PhotoViewerActivity extends Activity {
 
     @BindView(R.id.iv_photo)
     ImageView ivPhoto;
@@ -23,7 +24,7 @@ public class DetailActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
+        setContentView(R.layout.activity_photo_viewer);
         ButterKnife.bind(this);
         hideStatusBar();
 
