@@ -42,10 +42,12 @@
             android:label="@string/title_activity_settings"
             android:parentActivityName=".screens.CameraActivity"
             android:theme="@style/FullscreenSettingsTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.vasskob.mycamera.screens.CameraActivity"/>
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts"/>
+
     </application>
 
 </manifest>
