@@ -52,4 +52,8 @@ public class CameraUtils {
         }
         return mediaFile;
     }
+
+    public static void loadAvailableResolutions() {
+
+    }
 }

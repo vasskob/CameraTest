@@ -60,6 +60,8 @@ import static com.example.vasskob.mycamera.utils.CameraUtils.PHOTO_PATH;
 
 public class CameraActivity extends Activity implements Camera.PictureCallback, Camera.ShutterCallback {
 
+    private static final int DEFAULT_FLASH_COUNTER_VALUE = 1;
+    private static final int DEFAULT_FLASH_BTN_BACKGROUND = R.drawable.ic_flash_auto;
     @BindView(R.id.main_container)
     ViewGroup mRootView;
 
@@ -85,7 +87,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     private CameraPreview mPreview;
     private View decorView;
     private Camera.Parameters params;
-    private int background;
+    private int flashBtnBackground = DEFAULT_FLASH_BTN_BACKGROUND;
     private String flashMode;
     private SensorManager sensorManager;
     private PowerManager.WakeLock wakeLock;
@@ -134,7 +136,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         @SuppressLint("InlinedApi")
         @Override
         public void run() {
-            btnFlash.setCompoundDrawablesWithIntrinsicBounds(0, 0, background, 0);
+            btnFlash.setCompoundDrawablesWithIntrinsicBounds(0, 0, flashBtnBackground, 0);
             params = mCamera.getParameters();
             params.setFlashMode(flashMode);
             mCamera.setParameters(params);
@@ -142,7 +144,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     };
 
     private void addCameraPreview(int cameraId) {
-        Log.d(TAG, "addCameraPreview: ");
+
         mCamera = CameraUtils.getCameraInstance(cameraId);
         if (mCamera == null) {
             Toast.makeText(this, getString(R.string.cameraWarn), Toast.LENGTH_SHORT).show();
@@ -161,6 +163,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         mPreview = new CameraPreview(this, mCamera);
         mPreview.setFocusView(focusView);
         preview.addView(mPreview);
+
 
         startWakeLock();
     }
@@ -185,11 +188,11 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     private void setCameraDefaultFlashMode() {
         params = mCamera.getParameters();
-        if (params.getSupportedFlashModes() != null && params.getSupportedFlashModes().contains(FLASH_MODE_AUTO)) {
-            params.setFlashMode(FLASH_MODE_AUTO);
+        if (params.getSupportedFlashModes() != null && params.getSupportedFlashModes().contains(flashMode)) {
+            params.setFlashMode(flashMode);
         }
         mCamera.setParameters(params);
-        btnFlash.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_flash_auto, 0);
+        btnFlash.setCompoundDrawablesWithIntrinsicBounds(0, 0, flashBtnBackground, 0);
     }
 
     private void setCameraAutoFocus() {
@@ -200,26 +203,25 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         mCamera.setParameters(params);
     }
 
-    private int clickCounter = 1;
+    private int flashClickCounter = DEFAULT_FLASH_COUNTER_VALUE;
 
     @OnClick(R.id.btn_flash)
     protected void changeFlashMode() {
-        background = R.drawable.ic_flash_auto;
         flashMode = Camera.Parameters.FLASH_MODE_AUTO;
         params = mCamera.getParameters();
 
-        clickCounter++;
-        switch (clickCounter) {
+        flashClickCounter++;
+        switch (flashClickCounter) {
             case 1:
-                background = R.drawable.ic_flash_auto;
+                flashBtnBackground = R.drawable.ic_flash_auto;
                 flashMode = FLASH_MODE_AUTO;
                 break;
             case 2:
-                background = R.drawable.ic_flash_on;
+                flashBtnBackground = R.drawable.ic_flash_on;
                 flashMode = FLASH_MODE_ON;
                 break;
             case 3:
-                background = R.drawable.ic_flash_off;
+                flashBtnBackground = R.drawable.ic_flash_off;
                 flashMode = FLASH_MODE_OFF;
                 break;
             case 4:
@@ -227,8 +229,8 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
                         PackageManager.FEATURE_CAMERA_FLASH)) {
                     flashMode = FLASH_MODE_TORCH;
                 }
-                background = R.drawable.ic_flash_torch;
-                clickCounter = 0;
+                flashBtnBackground = R.drawable.ic_flash_torch;
+                flashClickCounter = 0;
                 break;
         }
 

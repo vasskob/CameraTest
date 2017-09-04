@@ -12,9 +12,19 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
+
+    signingConfigs {
+        config {
+            keyAlias 'my_camera'
+            keyPassword 'mycamera2017'
+            storeFile file('mycamera.jks')
+            storePassword 'mycamera2017'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -42,4 +52,6 @@ dependencies {
 
     implementation 'com.jakewharton:butterknife:8.6.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
 }

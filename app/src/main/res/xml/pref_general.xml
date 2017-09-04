@@ -1,48 +1,72 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/camera_category"/>
+        android:key="camera_category"
+        android:title="@string/camera_category">
 
-    <ListPreference
-        android:defaultValue="(4:3) 8.0 megapixels"
-        android:entries="@array/pref_sync_frequency_titles"
-        android:entryValues="@array/pref_sync_frequency_values"
-        android:key="back_camera_quality"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_back_camera_photo_quality"/>
+        <ListPreference
+            android:defaultValue="12"
+            android:key="back_camera1_quality"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_back_camera1_photo_quality"/>
 
-    <ListPreference
-        android:defaultValue="(4:3) 8.0 megapixels"
-        android:entries="@array/pref_sync_frequency_titles"
-        android:entryValues="@array/pref_sync_frequency_values"
-        android:key="front_camera_quality"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_front_camera_photo_quality"/>
+        <!--android:entries="@array/pref_sync_frequency_titles"-->
+        <!--android:entryValues="@array/pref_sync_frequency_values"-->
 
+
+        <!--<ListPreference-->
+        <!--android:defaultValue="8"-->
+        <!--android:entries="@array/pref_sync_frequency_titles"-->
+        <!--android:entryValues="@array/pref_sync_frequency_values"-->
+        <!--android:key="back_camera2_quality"-->
+        <!--android:negativeButtonText="@null"-->
+        <!--android:positiveButtonText="@null"-->
+        <!--android:title="@string/pref_title_back_camera2_photo_quality"/>-->
+
+        <ListPreference
+            android:defaultValue="8"
+            android:key="front_camera_quality"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_front_camera_photo_quality"/>
+
+        <!--android:entries="@array/pref_sync_frequency_titles"-->
+        <!--android:entryValues="@array/pref_sync_frequency_values"-->
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/video_category"/>
 
     <ListPreference
-        android:defaultValue="(4:3) 8.0 megapixels"
-        android:entries="@array/pref_sync_frequency_titles"
-        android:entryValues="@array/pref_sync_frequency_values"
+        android:defaultValue="8"
         android:key="back_video_quality"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_title_back_camera_video_quality"/>
+    <!--android:entries="@array/pref_sync_frequency_titles"-->
+    <!--android:entryValues="@array/pref_sync_frequency_values"-->
 
     <ListPreference
-        android:defaultValue="(4:3) 8.0 megapixels"
-        android:entries="@array/pref_sync_frequency_titles"
-        android:entryValues="@array/pref_sync_frequency_values"
+        android:defaultValue="8"
         android:key="front_video_quality"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_title_front_camera_video_quality"/>
+    <!--android:entries="@array/pref_sync_frequency_titles"-->
+    <!--android:entryValues="@array/pref_sync_frequency_values"-->
 
+    <PreferenceCategory
+        android:title="@string/quality_category"/>
+
+    <ListPreference
+        android:defaultValue="100"
+        android:entries="@array/pref_jpeg_compression_title"
+        android:entryValues="@array/pref_jpeg_compression_value"
+        android:key="jpeg_compression"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_jpeg_compression"/>
     <PreferenceCategory/>
 
 </PreferenceScreen>
