@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.example.vasskob.mycamera.BuildConfig;
 import com.example.vasskob.mycamera.R;
 import com.example.vasskob.mycamera.utils.CameraUtils;
+import com.example.vasskob.mycamera.utils.PictureSize;
 import com.example.vasskob.mycamera.utils.PictureSizeLoader;
 import com.example.vasskob.mycamera.utils.PreferencesManager;
 
@@ -30,6 +31,14 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.vasskob.mycamera.utils.CameraUtils.BACK_CAMERA_2_QUALITY;
+import static com.example.vasskob.mycamera.utils.CameraUtils.BACK_CAMERA_QUALITY;
+import static com.example.vasskob.mycamera.utils.CameraUtils.BACK_VIDEO_QUALITY;
+import static com.example.vasskob.mycamera.utils.CameraUtils.CAMERA_CATEGORY;
+import static com.example.vasskob.mycamera.utils.CameraUtils.FRONT_CAMERA_QUALITY;
+import static com.example.vasskob.mycamera.utils.CameraUtils.FRONT_VIDEO_QUALITY;
+import static com.example.vasskob.mycamera.utils.CameraUtils.JPEG_COMPRESSION;
 
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
@@ -89,7 +98,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-        CameraUtils.loadAvailableResolutions();
     }
 
 
@@ -135,6 +143,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
 
+        public static final int RESOLUTION_COUNT = 5;
         private ListPreference backCamera2Pref;
 
         @Override
@@ -147,11 +156,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 //                PreferencesManager.setIsFirstLaunch(getActivity(), false);
 //            }
 
-            bindPreferenceSummaryToValue(findPreference("back_camera1_quality"));
-            bindPreferenceSummaryToValue(findPreference("front_camera_quality"));
-            bindPreferenceSummaryToValue(findPreference("back_video_quality"));
-            bindPreferenceSummaryToValue(findPreference("front_video_quality"));
-            bindPreferenceSummaryToValue(findPreference("jpeg_compression"));
+            bindPreferenceSummaryToValue(findPreference(BACK_CAMERA_QUALITY));
+            bindPreferenceSummaryToValue(findPreference(FRONT_CAMERA_QUALITY));
+            bindPreferenceSummaryToValue(findPreference(BACK_VIDEO_QUALITY));
+            bindPreferenceSummaryToValue(findPreference(FRONT_VIDEO_QUALITY));
+            bindPreferenceSummaryToValue(findPreference(JPEG_COMPRESSION));
 
         }
 
@@ -170,57 +179,77 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
 
         private void setBackCamera2Res(PictureSizeLoader.PictureSizes pictureSizes) {
-            List<Camera.Size> camera2Sizes = pictureSizes.getBackCamera2Sizes();
+            List<PictureSize> camera2Sizes = pictureSizes.getBackCamera2Sizes();
             if (camera2Sizes != null) {
                 backCamera2Pref = new ListPreference(getActivity());
-                backCamera2Pref.setKey("back_camera2_quality");
+                backCamera2Pref.setKey(BACK_CAMERA_2_QUALITY);
                 backCamera2Pref.setTitle(getString(R.string.pref_title_back_camera2_photo_quality));
-                backCamera2Pref.setDefaultValue("0");
                 setCameraRes(camera2Sizes, backCamera2Pref);
-                PreferenceCategory rootScreen = (PreferenceCategory) findPreference("camera_category");
+                PreferenceCategory rootScreen = (PreferenceCategory) findPreference(CAMERA_CATEGORY);
                 rootScreen.addPreference(backCamera2Pref);
-                bindPreferenceSummaryToValue(findPreference("back_camera2_quality"));
+                bindPreferenceSummaryToValue(findPreference(BACK_CAMERA_2_QUALITY));
             }
         }
 
         private void setVideoBackRes(PictureSizeLoader.PictureSizes pictureSizes) {
-            List<Camera.Size> videoBackSizes = pictureSizes.getVideoQualitiesBack();
-            ListPreference backVideoPref = (ListPreference) findPreference("back_video_quality");
+            List<PictureSize> videoBackSizes = pictureSizes.getVideoQualitiesBack();
+            ListPreference backVideoPref = (ListPreference) findPreference(BACK_VIDEO_QUALITY);
             setCameraRes(videoBackSizes, backVideoPref);
         }
 
         private void setVideoFrontRes(PictureSizeLoader.PictureSizes pictureSizes) {
-            List<Camera.Size> videoFrontSizes = pictureSizes.getVideoQualitiesFront();
-            ListPreference frontVideoPref = (ListPreference) findPreference("front_video_quality");
+            List<PictureSize> videoFrontSizes = pictureSizes.getVideoQualitiesFront();
+            ListPreference frontVideoPref = (ListPreference) findPreference(FRONT_VIDEO_QUALITY);
             setCameraRes(videoFrontSizes, frontVideoPref);
         }
 
         private void setFrontCameraRes(PictureSizeLoader.PictureSizes pictureSizes) {
-            List<Camera.Size> cameraFrontSizes = pictureSizes.getFrontCameraSizes();
-            ListPreference frontCameraPref = (ListPreference) findPreference("front_camera_quality");
+            List<PictureSize> cameraFrontSizes = pictureSizes.getFrontCameraSizes();
+            ListPreference frontCameraPref = (ListPreference) findPreference(FRONT_CAMERA_QUALITY);
             setCameraRes(cameraFrontSizes, frontCameraPref);
         }
 
         private void setBackCamera1Res(PictureSizeLoader.PictureSizes pictureSizes) {
-            List<Camera.Size> camera1Sizes = pictureSizes.getBackCamera1Sizes();
-            ListPreference backCamera1Pref = (ListPreference) findPreference("back_camera1_quality");
+            List<PictureSize> camera1Sizes = pictureSizes.getBackCamera1Sizes();
+            ListPreference backCamera1Pref = (ListPreference) findPreference(BACK_CAMERA_QUALITY);
+            if (Camera.getNumberOfCameras() < 3) {
+                backCamera1Pref.setTitle(R.string.pref_title_back_camera_photo_quality);
+            } else {
+                backCamera1Pref.setTitle(R.string.pref_title_back_camera1_photo_quality);
+            }
             setCameraRes(camera1Sizes, backCamera1Pref);
         }
 
-        private void setCameraRes(List<Camera.Size> cameraSizes, ListPreference cameraPrefs) {
+        private void setCameraRes(List<PictureSize> cameraSizes, ListPreference cameraPrefs) {
+            Log.d(TAG, "setCameraRes: noDefaultValue");
             CharSequence[] entries;
             CharSequence[] entryValues;
             if (cameraSizes != null) {
-                entries = new String[cameraSizes.size()];
-                entryValues = new String[cameraSizes.size()];
-                for (int i = 0; i < cameraSizes.size(); i++) {
-                    entries[i] = cameraSizes.get(i).width + "x" + cameraSizes.get(i).height;
-                    entryValues[i] = Integer.toString(cameraSizes.get(i).width + cameraSizes.get(i).height);
+                entries = new String[RESOLUTION_COUNT];
+                entryValues = new String[RESOLUTION_COUNT];
+                for (int i = 0; i < Math.min(cameraSizes.size(), RESOLUTION_COUNT); i++) {
+                    String stringRatio = CameraUtils.getStringRatio(cameraSizes.get(i).aspectRatio());
+                    entries[i] = stringRatio + "  " + cameraSizes.get(i).toString();
+                    entryValues[i] = Integer.toString(cameraSizes.get(i).getWidth()) + "x" + Integer.toString(cameraSizes.get(i).getHeight());
                 }
                 cameraPrefs.setEntries(entries);
                 cameraPrefs.setEntryValues(entryValues);
+                if (noDefaultValue(cameraPrefs)) {
+                    cameraPrefs.setDefaultValue(entryValues[0].toString());
+                    cameraPrefs.setValue(entryValues[0].toString());
+                    cameraPrefs.setSummary(entryValues[0].toString());
+                }
             }
         }
+
+        private boolean noDefaultValue(Preference prefs) {
+
+            return PreferenceManager
+                    .getDefaultSharedPreferences(prefs.getContext())
+                    .getString(prefs.getKey(), "")
+                    .isEmpty();
+        }
+
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {

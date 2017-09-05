@@ -8,12 +8,12 @@ public class PreferencesManager {
     private static Context mContext = null;
     private static final String KEY_IS_FIRST_LAUNCH = "IS_FIRST_LAUNCH";
 
-    private static SharedPreferences getPref(Context _context) {
-        String PREFS_NAME = "com.example.vasskob.mycamera.utils.PREFS_NAME";
+    private static SharedPreferences getPref(Context context) {
+        String PREFS_NAME = "PREFS_NAME";
         if (mSharedPreferences != null) {
             return mSharedPreferences;
         }
-        mContext = _context;
+        mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(PREFS_NAME, 0);
         return mSharedPreferences;
     }
@@ -29,5 +29,17 @@ public class PreferencesManager {
     public static boolean isFirstLaunch(Context context) {
         mSharedPreferences = getPref(context);
         return mSharedPreferences.getBoolean(KEY_IS_FIRST_LAUNCH, true);
+    }
+
+    public static void setCameraPreference(Context context, String prefs) {
+        mSharedPreferences = getPref(context);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(CameraUtils.BACK_CAMERA_QUALITY, prefs);
+        editor.apply();
+    }
+
+    public static String getCameraPreference(Context context) {
+        mSharedPreferences = getPref(context);
+        return mSharedPreferences.getString(CameraUtils.BACK_CAMERA_QUALITY, "");
     }
 }

@@ -43,6 +43,7 @@
     <string name="pref_title_front_camera_photo_quality">Front camera photo</string>
     <string name="pref_title_back_camera2_photo_quality">Back camera2 photo</string>
     <string name="pref_title_back_camera1_photo_quality">Back camera1 photo</string>
+    <string name="pref_title_back_camera_photo_quality">Back camera photo</string>
     <string-array name="pref_sync_frequency_titles">
         <item>(4:3) 8.0 mpx</item>
         <item>(4:3) 5.0 mpx</item>

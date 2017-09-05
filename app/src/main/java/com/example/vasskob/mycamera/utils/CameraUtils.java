@@ -13,6 +13,24 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 public class CameraUtils {
+    public static final String BACK_CAMERA_QUALITY = "back_camera_quality";
+    public static final String BACK_CAMERA_2_QUALITY = "back_camera2_quality";
+    public static final String FRONT_CAMERA_QUALITY = "front_camera_quality";
+    public static final String BACK_VIDEO_QUALITY = "back_video_quality";
+    public static final String FRONT_VIDEO_QUALITY = "front_video_quality";
+    public static final String JPEG_COMPRESSION = "jpeg_compression";
+    public static final String CAMERA_CATEGORY = "camera_category";
+
+    public static final String ASPECT_RATIO_4_3_STRING = "(4:3)";
+    public static final String ASPECT_RATIO_16_9_STRING = "(16:9)";
+    public static final String ASPECT_RATIO_15_9_STRING = "(15:9)";
+
+    private static final float ASPECT_RATIO_4_3 = 1.3333334f;
+    private static final float ASPECT_RATIO_16_9 = 1.7777778f;
+    private static final float ASPECT_RATIO_15_9 = 1.6666666f;
+
+    public static final String UNKNOWN = "Unknown";
+
 
     public static final String PHOTO_PATH = "PHOTO_PATH";
     public static final int FOCUS_VIEW_HEIGHT = 100;
@@ -53,7 +71,28 @@ public class CameraUtils {
         return mediaFile;
     }
 
-    public static void loadAvailableResolutions() {
-
+    public static String getStringRatio(float v) {
+        String ratio;
+        if (v == ASPECT_RATIO_4_3) {
+            ratio = ASPECT_RATIO_4_3_STRING;
+        } else if (v == ASPECT_RATIO_16_9) {
+            ratio = ASPECT_RATIO_16_9_STRING;
+        } else if (v == ASPECT_RATIO_15_9) {
+            ratio = ASPECT_RATIO_15_9_STRING;
+        } else ratio = UNKNOWN;
+        return ratio;
     }
+
+    public static PictureSize getPreviewSizeForRatio(float v) {
+        PictureSize pictureSize;
+        if (v == ASPECT_RATIO_4_3) {
+            pictureSize = new PictureSize(800, 600);
+        } else if (v == ASPECT_RATIO_16_9) {
+            pictureSize = new PictureSize(1280, 720);
+        } else if (v == ASPECT_RATIO_15_9) {
+            pictureSize = new PictureSize(1280, 768);
+        } else pictureSize = new PictureSize(800, 600);
+        return pictureSize;
+    }
+
 }

@@ -9,6 +9,9 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.example.vasskob.mycamera.utils.CameraUtils;
+import com.example.vasskob.mycamera.utils.PictureSize;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +55,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         for (Camera.Size item : list) {
             Log.d(TAG, "setupCamera: Width= " + item.width + ", Height = " + item.height + "\n");
         }
-
-        parameters.setPreviewSize(1280, 960);
-        // parameters.setPictureSize(640, 480);
+        //   parameters.setPreviewSize(1280, 960);
+        Camera.Parameters params = mCamera.getParameters();
+        Camera.Size size = params.getPictureSize();
+        float ratio = ((float) size.width) / ((float) size.height);
+        PictureSize pictureSize = CameraUtils.getPreviewSizeForRatio(ratio);
+        parameters.setPreviewSize(pictureSize.getWidth(), pictureSize.getHeight());
         mCamera.setParameters(parameters);
     }
 

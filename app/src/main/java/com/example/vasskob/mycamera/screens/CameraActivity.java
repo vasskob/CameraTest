@@ -19,11 +19,15 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -36,6 +40,7 @@ import com.example.vasskob.mycamera.R;
 import com.example.vasskob.mycamera.customView.CameraPreview;
 import com.example.vasskob.mycamera.customView.FocusView;
 import com.example.vasskob.mycamera.utils.CameraUtils;
+import com.example.vasskob.mycamera.utils.PictureSize;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.nabinbhandari.android.permissions.PermissionHandler;
 import com.nabinbhandari.android.permissions.Permissions;
@@ -62,8 +67,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     private static final int DEFAULT_FLASH_COUNTER_VALUE = 1;
     private static final int DEFAULT_FLASH_BTN_BACKGROUND = R.drawable.ic_flash_auto;
-    @BindView(R.id.main_container)
-    ViewGroup mRootView;
 
     @BindView(R.id.camera_preview)
     ViewGroup preview;
@@ -76,6 +79,9 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     @BindView(R.id.focus_view)
     FocusView focusView;
+
+    @BindView(R.id.fl_preview_container)
+    FrameLayout flPreviewContainer;
 
     private static final String TAG = CameraActivity.class.getSimpleName();
     private static final String WAKE_LOCK_TAG = "TORCH_WAKE_LOCK";
@@ -159,13 +165,53 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         }
         //setCameraAutoFocus();
         setCameraDefaultFlashMode();
-
+        setCameraResolution();
         mPreview = new CameraPreview(this, mCamera);
         mPreview.setFocusView(focusView);
         preview.addView(mPreview);
 
-
         startWakeLock();
+    }
+
+    private void setCameraResolution() {
+        String prefSize = PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getString(getKey(), "");
+        String prefJpeg = PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getString(CameraUtils.JPEG_COMPRESSION, "");
+
+        if (prefSize.isEmpty()) {
+            return;
+        }
+        Log.d(TAG, "setCameraResolution: prefSize" + prefSize + " counter =" + switchCounter);
+        PictureSize pictureSize = PictureSize.fromSettingString(prefSize);
+
+        params = mCamera.getParameters();
+        params.setPictureSize(pictureSize.width(), pictureSize.height());
+        params.setJpegQuality(Integer.valueOf(prefJpeg));
+        mCamera.setParameters(params);
+
+        setPreviewRatio(pictureSize.aspectRatio());
+        Log.d(TAG, "setCameraResolution: prefs = " + pictureSize.toString() + " jpeg = " + prefJpeg);
+
+    }
+
+    private void setPreviewRatio(float ratio) {
+        Display display = getWindowManager().getDefaultDisplay();
+        flPreviewContainer.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (display.getWidth() * ratio)));
+    }
+
+    private String getKey() {
+        if (frontCameraOn) {
+            return CameraUtils.FRONT_CAMERA_QUALITY;
+        }
+        switch (switchCounter) {
+            case 1:
+                return CameraUtils.BACK_CAMERA_2_QUALITY;
+            default:
+                return CameraUtils.BACK_CAMERA_QUALITY;
+        }
     }
 
     private void startWakeLock() {

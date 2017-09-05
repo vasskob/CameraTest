@@ -17,7 +17,8 @@ public class PictureSizeLoader {
                     computeVideoForCamera(n - 3),
                     computeVideoForCamera(n - 1));
         } else if (n == 2) {
-            return new PictureSizes(computeSizesForCamera(n - 2), null,
+            return new PictureSizes(computeSizesForCamera(n - 2),
+                    null,
                     computeSizesForCamera(n - 1),
                     computeVideoForCamera(n - 2),
                     computeVideoForCamera(n - 1));
@@ -29,28 +30,30 @@ public class PictureSizeLoader {
         );
     }
 
-    private static List<Camera.Size> computeSizesForCamera(int cameraId) {
+    private static List<PictureSize> computeSizesForCamera(int cameraId) {
         Camera camera = CameraUtils.getCameraInstance(cameraId);
-        List<Camera.Size> camSizes = camera.getParameters().getSupportedPictureSizes();
+        List<Camera.Size> supportedPictureSizes = camera.getParameters().getSupportedPictureSizes();
+        List<PictureSize> camSizes = new PhotoSizeMapper().mapList(supportedPictureSizes);
         camera.release();
         return camSizes;
     }
 
-    private static List<Camera.Size> computeVideoForCamera(int cameraId) {
+    private static List<PictureSize> computeVideoForCamera(int cameraId) {
         Camera camera = CameraUtils.getCameraInstance(cameraId);
-        List<Camera.Size> videoSizes = camera.getParameters().getSupportedVideoSizes();
+        List<Camera.Size> supportedVideoSizes = camera.getParameters().getSupportedVideoSizes();
+        List<PictureSize> videoSizes = new PhotoSizeMapper().mapList(supportedVideoSizes);
         camera.release();
         return videoSizes;
     }
 
     public static class PictureSizes {
-        final List<Camera.Size> backCamera1Sizes;
-        final List<Camera.Size> backCamera2Sizes;
-        final List<Camera.Size> frontCameraSizes;
-        final List<Camera.Size> videoQualitiesBack;
-        final List<Camera.Size> videoQualitiesFront;
+        final List<PictureSize> backCamera1Sizes;
+        final List<PictureSize> backCamera2Sizes;
+        final List<PictureSize> frontCameraSizes;
+        final List<PictureSize> videoQualitiesBack;
+        final List<PictureSize> videoQualitiesFront;
 
-        PictureSizes(List<Camera.Size> backCamera1Sizes, List<Camera.Size> backCamera2Sizes, List<Camera.Size> frontCameraSizes, List<Camera.Size> videoQualitiesBack, List<Camera.Size> videoQualitiesFront) {
+        PictureSizes(List<PictureSize> backCamera1Sizes, List<PictureSize> backCamera2Sizes, List<PictureSize> frontCameraSizes, List<PictureSize> videoQualitiesBack, List<PictureSize> videoQualitiesFront) {
             this.backCamera1Sizes = backCamera1Sizes;
             this.backCamera2Sizes = backCamera2Sizes;
             this.frontCameraSizes = frontCameraSizes;
@@ -58,23 +61,23 @@ public class PictureSizeLoader {
             this.videoQualitiesFront = videoQualitiesFront;
         }
 
-        public List<Camera.Size> getBackCamera1Sizes() {
+        public List<PictureSize> getBackCamera1Sizes() {
             return backCamera1Sizes;
         }
 
-        public List<Camera.Size> getBackCamera2Sizes() {
+        public List<PictureSize> getBackCamera2Sizes() {
             return backCamera2Sizes;
         }
 
-        public List<Camera.Size> getFrontCameraSizes() {
+        public List<PictureSize> getFrontCameraSizes() {
             return frontCameraSizes;
         }
 
-        public List<Camera.Size> getVideoQualitiesBack() {
+        public List<PictureSize> getVideoQualitiesBack() {
             return videoQualitiesBack;
         }
 
-        public List<Camera.Size> getVideoQualitiesFront() {
+        public List<PictureSize> getVideoQualitiesFront() {
             return videoQualitiesFront;
         }
     }
