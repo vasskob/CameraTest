@@ -22,8 +22,8 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -173,6 +173,14 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         startWakeLock();
     }
 
+    //    private void setCameraAutoFocus() {
+//        params = mCamera.getParameters();
+//        if (params.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+//            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+//        }
+//        mCamera.setParameters(params);
+//    }
+
     private void setCameraResolution() {
         String prefSize = PreferenceManager
                 .getDefaultSharedPreferences(this)
@@ -198,8 +206,9 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     }
 
     private void setPreviewRatio(float ratio) {
-        Display display = getWindowManager().getDefaultDisplay();
-        flPreviewContainer.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (display.getWidth() * ratio)));
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        flPreviewContainer.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (displaymetrics.widthPixels * ratio)));
     }
 
     private String getKey() {
@@ -239,14 +248,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         }
         mCamera.setParameters(params);
         btnFlash.setCompoundDrawablesWithIntrinsicBounds(0, 0, flashBtnBackground, 0);
-    }
-
-    private void setCameraAutoFocus() {
-        params = mCamera.getParameters();
-        if (params.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        }
-        mCamera.setParameters(params);
     }
 
     private int flashClickCounter = DEFAULT_FLASH_COUNTER_VALUE;
@@ -305,6 +306,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     public void getOrientation() {
         sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+        assert sensorManager != null;
         sensorManager.registerListener(listener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
 
     }
