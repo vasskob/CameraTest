@@ -230,12 +230,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
                 cameraPrefs.setEntries(entries);
                 cameraPrefs.setEntryValues(entryValues);
-                if (noDefaultValue(cameraPrefs)) {
-                    Log.d(TAG, "setCameraRes: noDefaultValue");
-                    cameraPrefs.setDefaultValue(entryValues[0].toString());
-                    cameraPrefs.setValue(entryValues[0].toString());
-                    cameraPrefs.setSummary(entryValues[0].toString());
-                }
+                setDefaultValues(cameraPrefs, entryValues);
+            }
+        }
+
+        private void setDefaultValues(ListPreference cameraPrefs, CharSequence[] entryValues) {
+            if (noDefaultValue(cameraPrefs)) {
+                Log.d(TAG, "setCameraRes: noDefaultValue");
+                cameraPrefs.setDefaultValue(entryValues[0].toString());
+                cameraPrefs.setValue(entryValues[0].toString());
+                cameraPrefs.setSummary(entryValues[0].toString());
             }
         }
 

@@ -105,6 +105,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
+        List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+        if (supportedFocusModes.size() == 1 && supportedFocusModes.get(0).equals("fixed")) {
+            return false;
+        }
+
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             float x = event.getX();
             float y = event.getY();
