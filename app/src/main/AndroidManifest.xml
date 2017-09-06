@@ -35,7 +35,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="detail"
             android:screenOrientation="portrait"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/PreviewTheme">
         </activity>
         <activity
             android:name=".screens.SettingsActivity"

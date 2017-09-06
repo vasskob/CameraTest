@@ -13,6 +13,7 @@
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowBackground">@null</item>
         <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
+        <item name="android:windowTranslucentNavigation">true</item>
         <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
     </style>
 
@@ -44,6 +45,10 @@
         <item name="android:textColor">@color/colorWhite</item>
         <item name="android:background">@color/darker_gray</item>
         <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="PreviewTheme" parent="FullscreenTheme">
+        <item name="android:windowTranslucentNavigation">false</item>
     </style>
 
 </resources>
