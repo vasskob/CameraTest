@@ -2,6 +2,7 @@ package com.example.vasskob.mycamera.utils;
 
 import android.hardware.Camera;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class PictureSizeLoader {
@@ -46,7 +47,7 @@ public class PictureSizeLoader {
         return videoSizes;
     }
 
-    public static class PictureSizes {
+    public static class PictureSizes implements Serializable {
         final List<PictureSize> backCamera1Sizes;
         final List<PictureSize> backCamera2Sizes;
         final List<PictureSize> frontCameraSizes;

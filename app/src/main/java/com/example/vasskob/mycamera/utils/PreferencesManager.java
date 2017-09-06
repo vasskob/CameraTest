@@ -30,16 +30,4 @@ public class PreferencesManager {
         mSharedPreferences = getPref(context);
         return mSharedPreferences.getBoolean(KEY_IS_FIRST_LAUNCH, true);
     }
-
-    public static void setCameraPreference(Context context, String prefs) {
-        mSharedPreferences = getPref(context);
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(CameraUtils.BACK_CAMERA_QUALITY, prefs);
-        editor.apply();
-    }
-
-    public static String getCameraPreference(Context context) {
-        mSharedPreferences = getPref(context);
-        return mSharedPreferences.getString(CameraUtils.BACK_CAMERA_QUALITY, "");
-    }
 }

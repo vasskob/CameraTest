@@ -2,11 +2,13 @@ package com.example.vasskob.mycamera.utils;
 
 import android.annotation.TargetApi;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 
-public class PictureSize implements Comparable<PictureSize> {
+public class PictureSize implements Comparable<PictureSize>, Serializable {
 
-    public static final int MEGA_PIXCEL = 1000000;
+    public static final int MEGA_PIXEL = 1000000;
     private final int height;
     private final int width;
 
@@ -36,7 +38,7 @@ public class PictureSize implements Comparable<PictureSize> {
     }
 
     public float resolution() {
-        return (float) (this.width * this.height) / MEGA_PIXCEL;
+        return (float) (this.width * this.height) / MEGA_PIXEL;
     }
 
     public float aspectRatio() {

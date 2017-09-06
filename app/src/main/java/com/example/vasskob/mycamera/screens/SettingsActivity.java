@@ -25,7 +25,6 @@ import com.example.vasskob.mycamera.R;
 import com.example.vasskob.mycamera.utils.CameraUtils;
 import com.example.vasskob.mycamera.utils.PictureSize;
 import com.example.vasskob.mycamera.utils.PictureSizeLoader;
-import com.example.vasskob.mycamera.utils.PreferencesManager;
 
 import java.util.List;
 
@@ -151,10 +150,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
-            //  if (fistLaunch()) {
             initCameraResolutionList();
-//                PreferencesManager.setIsFirstLaunch(getActivity(), false);
-//            }
 
             bindPreferenceSummaryToValue(findPreference(BACK_CAMERA_QUALITY));
             bindPreferenceSummaryToValue(findPreference(FRONT_CAMERA_QUALITY));
@@ -164,18 +160,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         }
 
-        private boolean fistLaunch() {
-            return PreferencesManager.isFirstLaunch(getActivity());
-        }
-
         private void initCameraResolutionList() {
-            PictureSizeLoader.PictureSizes pictureSizes = PictureSizeLoader.getPictureSizes();
+            PictureSizeLoader.PictureSizes pictureSizes;
+            pictureSizes = CameraUtils.loadPicSizesFromStorage(getActivity());
+            if (pictureSizes == null) {
+                Log.d(TAG, "initCameraResolutionList: ");
+                pictureSizes = PictureSizeLoader.getPictureSizes();
+                CameraUtils.savePicSizesToStorage(getActivity(), pictureSizes);
+            }
             setBackCamera1Res(pictureSizes);
             setBackCamera2Res(pictureSizes);
             setFrontCameraRes(pictureSizes);
             setVideoFrontRes(pictureSizes);
             setVideoBackRes(pictureSizes);
-            Log.d(TAG, "initCameraResolutionList: ");
         }
 
         private void setBackCamera2Res(PictureSizeLoader.PictureSizes pictureSizes) {
@@ -221,7 +218,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
 
         private void setCameraRes(List<PictureSize> cameraSizes, ListPreference cameraPrefs) {
-            Log.d(TAG, "setCameraRes: noDefaultValue");
             CharSequence[] entries;
             CharSequence[] entryValues;
             if (cameraSizes != null) {
@@ -235,6 +231,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 cameraPrefs.setEntries(entries);
                 cameraPrefs.setEntryValues(entryValues);
                 if (noDefaultValue(cameraPrefs)) {
+                    Log.d(TAG, "setCameraRes: noDefaultValue");
                     cameraPrefs.setDefaultValue(entryValues[0].toString());
                     cameraPrefs.setValue(entryValues[0].toString());
                     cameraPrefs.setSummary(entryValues[0].toString());
@@ -243,7 +240,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
 
         private boolean noDefaultValue(Preference prefs) {
-
             return PreferenceManager
                     .getDefaultSharedPreferences(prefs.getContext())
                     .getString(prefs.getKey(), "")
