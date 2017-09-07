@@ -43,6 +43,7 @@
     <style name="MyDialogStyle" parent="Theme.AppCompat.DayNight.Dialog">
         <item name="android:textColorAlertDialogListItem">@color/colorGray</item>
         <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textSize">18dp</item>
         <item name="android:background">@color/darker_gray</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>

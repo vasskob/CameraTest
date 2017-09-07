@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory/>
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="sound_recording_key"
+        android:title="@string/pref_sound_on_off"/>
+
+    <PreferenceCategory/>
+
+    <!--<SwitchPreference-->
+    <!--android:defaultValue="true"-->
+    <!--android:key="save_location_key"-->
+    <!--android:title="@string/pref_location"/>-->
+
+    <!--<PreferenceCategory/>-->
+
+</PreferenceScreen>

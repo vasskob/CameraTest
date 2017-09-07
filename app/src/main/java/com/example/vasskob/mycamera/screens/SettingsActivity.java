@@ -26,6 +26,7 @@ import com.example.vasskob.mycamera.utils.CameraUtils;
 import com.example.vasskob.mycamera.utils.PictureSize;
 import com.example.vasskob.mycamera.utils.PictureSizeLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -50,12 +51,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             String stringValue = value.toString();
 
             if (preference instanceof ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
 
-                // Set the summary to reflect the new value.
                 if (index >= 0) {
                     String prefValue = listPreference.getEntries()[index].toString();
                     if (prefValue.contains("%")) {
@@ -64,29 +62,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     preference.setSummary(prefValue);
                 } else preference.setSummary(null);
             } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
                 preference.setSummary(stringValue);
             }
             return true;
         }
     };
 
-    //    /**
-//     * Binds a preference's summary to its value. More specifically, when the
-//     * preference's value is changed, its summary (line of text below the
-//     * preference title) is updated to reflect the value. The summary is also
-//     * immediately updated upon calling this method. The exact display format is
-//     * dependent on the type of preference.
-//     *
-//     * @see #sBindPreferenceSummaryToValueListener
-//     */
     private static void bindPreferenceSummaryToValue(Preference preference) {
-        // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
@@ -136,6 +119,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
+                || AdvancedFragment.class.getName().equals(fragmentName)
                 || AboutFragment.class.getName().equals(fragmentName);
     }
 
@@ -143,6 +127,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static class GeneralPreferenceFragment extends PreferenceFragment {
 
         public static final int RESOLUTION_COUNT = 5;
+        private static final int VIDEO_RES_COUNT = 10;
         private ListPreference backCamera2Pref;
 
         @Override
@@ -191,13 +176,44 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         private void setVideoBackRes(PictureSizeLoader.PictureSizes pictureSizes) {
             List<PictureSize> videoBackSizes = pictureSizes.getVideoQualitiesBack();
             ListPreference backVideoPref = (ListPreference) findPreference(BACK_VIDEO_QUALITY);
-            setCameraRes(videoBackSizes, backVideoPref);
+            // setCameraRes(videoBackSizes, backVideoPref);
+            setVideoRes(videoBackSizes, backVideoPref);
+        }
+
+        private void setVideoRes(List<PictureSize> videoResSizes, ListPreference videoPref) {
+            CharSequence[] entries;
+            CharSequence[] entryValues;
+            if (videoResSizes != null) {
+                entries = new String[videoResSizes.size()];
+                entryValues = new String[videoResSizes.size()];
+                for (int i = 0; i < videoResSizes.size(); i++) {
+                    String label = videoResSizes.get(i).getVideoLabel();
+                    String stringRatio = CameraUtils.getStringRatio(videoResSizes.get(i).aspectRatio());
+                    if (!label.equals(CameraUtils.UNKNOWN)) {
+                        entries[i] = stringRatio + " " + label + " " + videoResSizes.get(i).toString();
+                        entryValues[i] = Integer.toString(videoResSizes.get(i).getWidth()) + "x" + Integer.toString(videoResSizes.get(i).getHeight());
+                    }
+                }
+                videoPref.setEntries(removeNullValue(entries));
+                videoPref.setEntryValues(removeNullValue(entryValues));
+                setDefaultValues(videoPref, removeNullValue(entryValues)[0]);
+            }
+        }
+
+        private CharSequence[] removeNullValue(CharSequence[] entries) {
+            List<String> list = new ArrayList<>();
+            for (CharSequence c : entries) {
+                if (c != null && c.length() > 0) {
+                    list.add(c.toString());
+                }
+            }
+            return list.toArray(new CharSequence[list.size()]);
         }
 
         private void setVideoFrontRes(PictureSizeLoader.PictureSizes pictureSizes) {
             List<PictureSize> videoFrontSizes = pictureSizes.getVideoQualitiesFront();
             ListPreference frontVideoPref = (ListPreference) findPreference(FRONT_VIDEO_QUALITY);
-            setCameraRes(videoFrontSizes, frontVideoPref);
+            setVideoRes(videoFrontSizes, frontVideoPref);
         }
 
         private void setFrontCameraRes(PictureSizeLoader.PictureSizes pictureSizes) {
@@ -230,16 +246,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
                 cameraPrefs.setEntries(entries);
                 cameraPrefs.setEntryValues(entryValues);
-                setDefaultValues(cameraPrefs, entryValues);
+                setDefaultValues(cameraPrefs, entryValues[0]);
             }
         }
 
-        private void setDefaultValues(ListPreference cameraPrefs, CharSequence[] entryValues) {
+        private void setDefaultValues(ListPreference cameraPrefs, CharSequence defaultValue) {
             if (noDefaultValue(cameraPrefs)) {
                 Log.d(TAG, "setCameraRes: noDefaultValue");
-                cameraPrefs.setDefaultValue(entryValues[0].toString());
-                cameraPrefs.setValue(entryValues[0].toString());
-                cameraPrefs.setSummary(entryValues[0].toString());
+                cameraPrefs.setDefaultValue(defaultValue.toString());
+                cameraPrefs.setValue(defaultValue.toString());
+                cameraPrefs.setSummary(defaultValue.toString());
             }
         }
 
@@ -250,6 +266,26 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     .isEmpty();
         }
 
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class AdvancedFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_advanced);
+            setHasOptionsMenu(true);
+        }
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {

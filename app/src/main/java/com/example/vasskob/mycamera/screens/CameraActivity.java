@@ -16,6 +16,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.CamcorderProfile;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -60,6 +62,8 @@ import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
 import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
 import static android.hardware.Camera.Parameters.FLASH_MODE_TORCH;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+import static com.example.vasskob.mycamera.utils.CameraUtils.ASPECT_RATIO_16_9;
 import static com.example.vasskob.mycamera.utils.CameraUtils.PHOTO_PATH;
 
 
@@ -67,6 +71,8 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     private static final int DEFAULT_FLASH_COUNTER_VALUE = 1;
     private static final int DEFAULT_FLASH_BTN_BACKGROUND = R.drawable.ic_flash_auto;
+    public static final double FOR_K_MULTIPLIER = 2.8;
+
 
     @BindView(R.id.camera_preview)
     ViewGroup preview;
@@ -100,6 +106,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     private File pictureFile;
 
     private boolean frontCameraOn;
+    private MediaRecorder mMediaRecorder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -166,7 +173,8 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         //setCameraAutoFocus();
         setCameraDefaultFlashMode();
         setCameraResolution();
-        mPreview = new CameraPreview(this, mCamera);
+
+        mPreview = new CameraPreview(this, mCamera, true);
         mPreview.setFocusView(focusView);
         preview.addView(mPreview);
 
@@ -193,14 +201,14 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
             return;
         }
         Log.d(TAG, "setCameraResolution: prefSize" + prefSize + " counter =" + switchCounter);
-        PictureSize pictureSize = PictureSize.fromSettingString(prefSize);
+        PictureSize pictureSize = CameraUtils.fromSettingString(prefSize);
 
         params = mCamera.getParameters();
         params.setPictureSize(pictureSize.width(), pictureSize.height());
         params.setJpegQuality(Integer.valueOf(prefJpeg));
         mCamera.setParameters(params);
-
-        setPreviewRatio(pictureSize.aspectRatio());
+        setPreviewRatio(ASPECT_RATIO_16_9);
+        //   setPreviewRatio(pictureSize.aspectRatio());
         Log.d(TAG, "setCameraResolution: prefs = " + pictureSize.toString() + " jpeg = " + prefJpeg);
 
     }
@@ -297,11 +305,152 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         }
     }
 
+    @BindView(R.id.btn_capture)
+    Button btnCapture;
+
     @OnClick(R.id.btn_capture)
     protected void onCaptureBtnClick() {
-        mCamera.takePicture(this, null, this);
-        getOrientation();
+//        mCamera.takePicture(this, null, this);
+//        getOrientation();
+        startVideoRecording();
+    }
 
+    private boolean isRecording = false;
+
+    private void startVideoRecording() {
+        if (isRecording) {
+
+            mMediaRecorder.stop();  // stop the recording
+            releaseMediaRecorder(); // release the MediaRecorder object
+            mCamera.lock();         // take camera access back from MediaRecorder
+
+            //  setCaptureButtonText("Capture");
+            btnCapture.setSelected(false);
+            isRecording = false;
+        } else {
+            // initialize video camera
+            if (prepareVideoRecorder()) {
+                // Camera is available and unlocked, MediaRecorder is prepared,
+                // now you can start recording
+                mMediaRecorder.start();
+
+                // inform the user that recording has started
+                //  setCaptureButtonText("Stop");
+                btnCapture.setSelected(true);
+                isRecording = true;
+            } else {
+                // prepare didn't work, release the camera
+                releaseMediaRecorder();
+                // inform user
+            }
+        }
+    }
+
+    private boolean prepareVideoRecorder() {
+
+        mMediaRecorder = new MediaRecorder();
+        mCamera.unlock();
+        mMediaRecorder.setCamera(mCamera);
+        if (isSoundRecord()) {
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        }
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+        String videoQualityString;
+        if (frontCameraOn) {
+            videoQualityString = CameraUtils.FRONT_VIDEO_QUALITY;
+        } else {
+            videoQualityString = CameraUtils.BACK_VIDEO_QUALITY;
+        }
+        String videoQuality = PreferenceManager.getDefaultSharedPreferences(this).getString(videoQualityString, "");
+        PictureSize pictureSize = CameraUtils.fromSettingString(videoQuality);
+        Log.d(TAG, "prepareVideoRecorder: videoQualString = " + videoQuality +
+                " pictureSize = " + String.valueOf(pictureSize == null) + " is UHD = " + isUHD(pictureSize));
+        int profileQuality = getVideoQuality(videoQualityString);
+        if (isSoundRecord()) {
+            if (isUHD(pictureSize)) {
+                setCamProfileFor4K(pictureSize, true);
+            } else {
+                CamcorderProfile profile = CamcorderProfile.get(profileQuality);
+                mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
+                mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+                mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
+                mMediaRecorder.setVideoEncoder(profile.videoCodec);
+            }
+        } else {
+            if (isUHD(pictureSize)) {
+                setCamProfileFor4K(pictureSize, false);
+            } else {
+                mMediaRecorder.setProfile(CamcorderProfile.get(profileQuality));
+            }
+        }
+        mMediaRecorder.setOutputFile(CameraUtils.getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
+        mMediaRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
+        try {
+            mMediaRecorder.prepare();
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
+            releaseMediaRecorder();
+            return false;
+        } catch (IOException e) {
+            Log.d(TAG, "IOException preparing MediaRecorder: " + e.getMessage());
+            releaseMediaRecorder();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isUHD(PictureSize pictureSize) {
+        return pictureSize.getVideoLabel().equals(CameraUtils.FOR_4K_UHD)
+                || pictureSize.getVideoLabel().equals(CameraUtils.UHD);
+    }
+
+    private void setCamProfileFor4K(PictureSize videoSize, boolean isAudioOn) {
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        if (isAudioOn) {
+            setAudioParams(profile);
+        }
+        mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
+        mMediaRecorder.setVideoEncodingBitRate((int) (profile.videoBitRate * FOR_K_MULTIPLIER));
+        mMediaRecorder.setVideoSize(videoSize.getWidth(), videoSize.getHeight());
+        mMediaRecorder.setVideoEncoder(profile.videoCodec);
+    }
+
+    private void setAudioParams(CamcorderProfile profile) {
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+        mMediaRecorder.setAudioEncodingBitRate(profile.audioBitRate);
+        mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
+        mMediaRecorder.setAudioChannels(profile.audioChannels);
+    }
+
+//    private void setProfileQuality(int profileQuality) {
+//        try {
+//            mMediaRecorder.setProfile(CamcorderProfile.get(profileQuality));
+//        } catch (IllegalStateException e) {
+//            Toast.makeText(this, "Sorry. Sound recording is not available!", Toast.LENGTH_SHORT).show();
+//            Log.e(TAG, "Sound is not available!!!");
+//        }
+//    }
+
+    private boolean isSoundRecord() {
+        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sound_recording_key", false);
+    }
+
+    private int getVideoQuality(String cameraId) {
+        String videoQuality = PreferenceManager.getDefaultSharedPreferences(this).getString(cameraId, "");
+        Log.d(TAG, "getVideoQuality: videoQuality = " + videoQuality);
+        return CameraUtils.getVideoQuality(videoQuality);
+    }
+
+    private void releaseMediaRecorder() {
+        if (mMediaRecorder != null) {
+            mMediaRecorder.reset();   // clear recorder configuration
+            mMediaRecorder.release(); // release the recorder object
+            mMediaRecorder = null;
+            mCamera.lock();           // lock camera for later use
+        }
     }
 
     public void getOrientation() {

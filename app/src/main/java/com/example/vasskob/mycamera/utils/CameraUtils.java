@@ -2,6 +2,7 @@ package com.example.vasskob.mycamera.utils;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
 import android.os.Environment;
 import android.util.Log;
 
@@ -28,21 +29,26 @@ public class CameraUtils {
     public static final String FRONT_VIDEO_QUALITY = "front_video_quality";
     public static final String JPEG_COMPRESSION = "jpeg_compression";
     public static final String CAMERA_CATEGORY = "camera_category";
-
     public static final String PHOTO_PATH = "PHOTO_PATH";
+
     private static final String ASPECT_RATIO_4_3_STRING = "(4:3)";
     private static final String ASPECT_RATIO_15_9_STRING = "(15:9)";
     private static final String ASPECT_RATIO_16_9_STRING = "(16:9)";
-
     private static final String ASPECT_RATIO_18_9_STRING = "(18:9)";
-    private static final String ASPECT_RATIO_UNKNOWN = "Unknown";
+
     private static final float ASPECT_RATIO_4_3 = 1.3333334f;
     private static final float ASPECT_RATIO_15_9 = 1.6666666f;
-    private static final float ASPECT_RATIO_16_9 = 1.7777778f;
+    public static final float ASPECT_RATIO_16_9 = 1.7777778f;
     private static final float ASPECT_RATIO_18_9 = 2.0f;
 
+    public static final String FOR_4K_UHD = "4K UHD";
+    public static final String UHD = "UHD";
+    public static final String FHD = "FHD";
+    public static final String HD = "HD";
+    public static final String SD = "SD";
     public static final int FOCUS_VIEW_HEIGHT = 100;
     private static final String PICTURE_SIZE_KEY = "picture";
+    public static final String UNKNOWN = "UNKNOWN";
 
     public static Camera getCameraInstance(int cameraId) {
         Camera c = null;
@@ -88,8 +94,38 @@ public class CameraUtils {
             ratio = ASPECT_RATIO_15_9_STRING;
         } else if (v == ASPECT_RATIO_18_9) {
             ratio = ASPECT_RATIO_18_9_STRING;
-        } else ratio = ASPECT_RATIO_UNKNOWN;
+        } else ratio = UNKNOWN;
         return ratio;
+    }
+
+    public static int getVideoQuality(String videoQuality) {
+        switch (videoQuality) {
+            case "2880x2160":
+                return CamcorderProfile.QUALITY_HIGH;
+            case "1920x1080":
+                return CamcorderProfile.QUALITY_1080P;
+            case "1280x720":
+                return CamcorderProfile.QUALITY_720P;
+            case "1280x480":
+                return CamcorderProfile.QUALITY_480P;
+            default:
+                return CamcorderProfile.QUALITY_1080P;
+        }
+    }
+
+    public static PictureSize fromSettingString(String sizeSettingString) {
+        if (sizeSettingString == null) {
+            return null;
+        }
+        String[] parts = sizeSettingString.split("x");
+        if (parts.length != 2) {
+            return null;
+        }
+        try {
+            return new PictureSize(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public static PictureSize getPreviewSizeForRatio(float v) {

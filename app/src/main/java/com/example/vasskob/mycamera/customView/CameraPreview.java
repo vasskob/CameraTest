@@ -25,10 +25,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Camera mCamera;
     private FocusView focusView;
     private boolean focusViewSet;
+    private boolean videoRecording;
 
-    public CameraPreview(Context context, Camera camera) {
+    public CameraPreview(Context context, Camera camera, boolean isVideoRecording) {
         super(context);
         mCamera = camera;
+        videoRecording = isVideoRecording;
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -39,7 +41,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
-        setupCamera();
+        if (videoRecording) {
+            setPreviewSizeForVideo();
+        } else {
+            setupCamera();
+        }
         // The Surface has been created, now tell the camera where to draw the preview.
         try {
             mCamera.setPreviewDisplay(holder);
@@ -50,17 +56,22 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void setupCamera() {
-        Camera.Parameters parameters = mCamera.getParameters();
-        List<Camera.Size> list = parameters.getSupportedPreviewSizes();
-        for (Camera.Size item : list) {
-            Log.d(TAG, "setupCamera: Width= " + item.width + ", Height = " + item.height + "\n");
-        }
         //   parameters.setPreviewSize(1280, 960);
+        Log.d(TAG, "setPreviewSizeForVideo: ");
         Camera.Parameters params = mCamera.getParameters();
         Camera.Size size = params.getPictureSize();
         float ratio = ((float) size.width) / ((float) size.height);
         PictureSize pictureSize = CameraUtils.getPreviewSizeForRatio(ratio);
-        parameters.setPreviewSize(pictureSize.getWidth(), pictureSize.getHeight());
+        params.setPreviewSize(pictureSize.getWidth(), pictureSize.getHeight());
+        mCamera.setParameters(params);
+    }
+
+    public void setPreviewSizeForVideo() {
+        Log.d(TAG, "setPreviewSizeForVideo: !!!");
+        Camera.Parameters parameters = mCamera.getParameters();
+//        PictureSize pictureSize = CameraUtils.getPreviewSizeForRatio(ASPECT_RATIO_16_9);
+//        parameters.setPreviewSize(pictureSize.getWidth(), pictureSize.getHeight());
+        parameters.setPreviewSize(1280, 720);
         mCamera.setParameters(parameters);
     }
 

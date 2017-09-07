@@ -87,5 +87,8 @@
     <string name="pref_title_front_camera_video_quality">Front camera video</string>
     <string name="pref_title_jpeg_compression">Jpeg quality</string>
     <string name="quality_category">Quality</string>
+    <string name="advanced_prefs">Advanced</string>
+    <string name="pref_sound_on_off">Video sound recording</string>
+    <string name="pref_location">Save location</string>
 
 </resources>
