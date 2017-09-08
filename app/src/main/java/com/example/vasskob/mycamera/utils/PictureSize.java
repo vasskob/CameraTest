@@ -81,10 +81,10 @@ public class PictureSize implements Comparable<PictureSize>, Serializable {
 
     public String getVideoLabel() {
         String label = CameraUtils.UNKNOWN;
-        if (width == 3840 && height == 2160) {
+        if (width >= 3840 && height >= 2160) {
             label = FOR_4K_UHD;
         }
-        if (width < 3840 && width > 2880 && height >= 1680) {
+        if (width < 3840 && width >= 2880 && height >= 1680) {
             label = UHD;
         }
         if (width == 1920 && height == 1080) {

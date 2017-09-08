@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.util.DisplayMetrics;
@@ -71,7 +72,7 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     private static final int DEFAULT_FLASH_COUNTER_VALUE = 1;
     private static final int DEFAULT_FLASH_BTN_BACKGROUND = R.drawable.ic_flash_auto;
-    public static final float FOR_K_MULTIPLIER = 2.8f;
+    public static final float FOR_K_MULTIPLIER = 5.0f;
 
 
     @BindView(R.id.camera_preview)
@@ -107,7 +108,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     private boolean frontCameraOn;
     private MediaRecorder mMediaRecorder;
-    private String videoQualityString;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -356,11 +356,8 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         }
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        if (frontCameraOn) {
-            videoQualityString = CameraUtils.FRONT_VIDEO_QUALITY;
-        } else {
-            videoQualityString = CameraUtils.BACK_VIDEO_QUALITY;
-        }
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        String videoQualityString = getVideoQualityString();
         String videoQuality = PreferenceManager.getDefaultSharedPreferences(this).getString(videoQualityString, "");
         PictureSize pictureSize = CameraUtils.fromSettingString(videoQuality);
         int profileQuality = getVideoQuality(videoQualityString);
@@ -381,6 +378,17 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         return true;
     }
 
+    @NonNull
+    private String getVideoQualityString() {
+        String videoQualityString;
+        if (frontCameraOn) {
+            videoQualityString = CameraUtils.FRONT_VIDEO_QUALITY;
+        } else {
+            videoQualityString = CameraUtils.BACK_VIDEO_QUALITY;
+        }
+        return videoQualityString;
+    }
+
     private int getVideoQuality(String cameraId) {
         String videoQuality = PreferenceManager.getDefaultSharedPreferences(this).getString(cameraId, "");
         Log.d(TAG, "getVideoQuality: videoQuality = " + videoQuality);
@@ -388,24 +396,15 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     }
 
     private void setMediaProfileQuality(PictureSize pictureSize, int profileQuality) {
-        if (isSoundRecord()) {
-            if (isUHDQuality(pictureSize)) {
-                setProfile4KQuality(pictureSize, true);
-            }
-            if (isLowQuality(pictureSize)) {
-                setProfileLowQuality(pictureSize, true);
-            } else {
-                setProfileQuality(profileQuality, true);
-            }
+        boolean isSoundOn = isSoundRecord();
+        if (isUHDQuality(pictureSize)) {
+            setProfile4KQuality(pictureSize, isSoundOn);
+            return;
+        }
+        if (isLowQuality(pictureSize)) {
+            setProfileLowQuality(pictureSize, isSoundOn);
         } else {
-            if (isUHDQuality(pictureSize)) {
-                setProfile4KQuality(pictureSize, false);
-            }
-            if (isLowQuality(pictureSize)) {
-                setProfileLowQuality(pictureSize, false);
-            } else {
-                setProfileQuality(profileQuality, false);
-            }
+            setProfileQuality(profileQuality, isSoundOn);
         }
     }
 
@@ -416,11 +415,11 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
     private void setProfile4KQuality(PictureSize videoSize, boolean isAudioOn) {
         CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
-        setVideoRateParams(profile, FOR_K_MULTIPLIER);
-        mMediaRecorder.setVideoSize(videoSize.width(), videoSize.height());
         if (isAudioOn) {
             setAudioParams(profile);
         }
+        setVideoRateParams(profile, FOR_K_MULTIPLIER);
+        mMediaRecorder.setVideoSize(videoSize.width(), videoSize.height());
     }
 
     private void setAudioParams(CamcorderProfile profile) {
@@ -430,32 +429,33 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         mMediaRecorder.setAudioChannels(profile.audioChannels);
     }
 
-    private boolean isLowQuality(PictureSize pictureSize) {
-        return pictureSize.getVideoLabel().equals(CameraUtils.SD);
-    }
-
-    private void setProfileLowQuality(PictureSize videoSize, boolean isAudioOn) {
-        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
-        setVideoRateParams(profile, 1);
-        mMediaRecorder.setVideoSize(videoSize.width(), videoSize.height());
-        if (isAudioOn) {
-            setAudioParams(profile);
-        }
-    }
-
     private void setVideoRateParams(CamcorderProfile profile, float multiplier) {
         mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
         mMediaRecorder.setVideoEncodingBitRate((int) (profile.videoBitRate * multiplier));
         mMediaRecorder.setVideoEncoder(profile.videoCodec);
     }
 
-    private void setProfileQuality(int profileQuality, boolean isAudioOn) {
-        CamcorderProfile profile = CamcorderProfile.get(profileQuality);
-        setVideoRateParams(profile, 1);
-        mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+    private boolean isLowQuality(PictureSize pictureSize) {
+        return pictureSize.getVideoLabel().equals(CameraUtils.SD);
+    }
+
+    private void setProfileLowQuality(PictureSize videoSize, boolean isAudioOn) {
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
         if (isAudioOn) {
             setAudioParams(profile);
         }
+        setVideoRateParams(profile, 1);
+        mMediaRecorder.setVideoSize(videoSize.width(), videoSize.height());
+    }
+
+    private void setProfileQuality(int profileQuality, boolean isAudioOn) {
+        Log.d(TAG, "setProfileQuality: 0");
+        CamcorderProfile profile = CamcorderProfile.get(profileQuality);
+        if (isAudioOn) {
+            setAudioParams(profile);
+        }
+        setVideoRateParams(profile, 1);
+        mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
     }
 
     private boolean isSoundRecord() {
