@@ -13,7 +13,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.example.vasskob.mycamera.utils.CameraUtils.PHOTO_PATH;
+import static com.example.vasskob.mycamera.utils.Constants.PHOTO_PATH;
 
 
 public class PhotoViewerActivity extends Activity {

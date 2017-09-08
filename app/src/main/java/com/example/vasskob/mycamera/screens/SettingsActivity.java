@@ -32,13 +32,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.example.vasskob.mycamera.utils.CameraUtils.BACK_CAMERA_2_QUALITY;
-import static com.example.vasskob.mycamera.utils.CameraUtils.BACK_CAMERA_QUALITY;
-import static com.example.vasskob.mycamera.utils.CameraUtils.BACK_VIDEO_QUALITY;
-import static com.example.vasskob.mycamera.utils.CameraUtils.CAMERA_CATEGORY;
-import static com.example.vasskob.mycamera.utils.CameraUtils.FRONT_CAMERA_QUALITY;
-import static com.example.vasskob.mycamera.utils.CameraUtils.FRONT_VIDEO_QUALITY;
-import static com.example.vasskob.mycamera.utils.CameraUtils.JPEG_COMPRESSION;
+import static com.example.vasskob.mycamera.utils.Constants.BACK_CAMERA_2_QUALITY;
+import static com.example.vasskob.mycamera.utils.Constants.BACK_CAMERA_QUALITY;
+import static com.example.vasskob.mycamera.utils.Constants.BACK_VIDEO_QUALITY;
+import static com.example.vasskob.mycamera.utils.Constants.CAMERA_CATEGORY;
+import static com.example.vasskob.mycamera.utils.Constants.FRONT_CAMERA_QUALITY;
+import static com.example.vasskob.mycamera.utils.Constants.FRONT_VIDEO_QUALITY;
+import static com.example.vasskob.mycamera.utils.Constants.JPEG_COMPRESSION;
+import static com.example.vasskob.mycamera.utils.Constants.UNKNOWN;
 
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
@@ -189,7 +190,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 for (int i = 0; i < videoResSizes.size(); i++) {
                     String label = videoResSizes.get(i).getVideoLabel();
                     String stringRatio = CameraUtils.getStringRatio(videoResSizes.get(i).aspectRatio());
-                    if (!label.equals(CameraUtils.UNKNOWN)) {
+                    if (!label.equals(UNKNOWN)) {
                         entries[i] = stringRatio + " " + label + " " + videoResSizes.get(i).toString();
                         entryValues[i] = Integer.toString(videoResSizes.get(i).width()) + "x" + Integer.toString(videoResSizes.get(i).height());
                     }

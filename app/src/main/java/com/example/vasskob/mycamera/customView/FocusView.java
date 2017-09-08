@@ -10,7 +10,7 @@ import android.view.View;
 
 import com.example.vasskob.mycamera.R;
 
-import static com.example.vasskob.mycamera.utils.CameraUtils.FOCUS_VIEW_HEIGHT;
+import static com.example.vasskob.mycamera.utils.Constants.FOCUS_VIEW_HEIGHT;
 
 
 public class FocusView extends View {

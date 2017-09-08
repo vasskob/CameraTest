@@ -9,14 +9,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.example.vasskob.mycamera.utils.CameraUtils;
-import com.example.vasskob.mycamera.utils.PictureSize;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.vasskob.mycamera.utils.CameraUtils.FOCUS_VIEW_HEIGHT;
+import static com.example.vasskob.mycamera.utils.Constants.FOCUS_VIEW_HEIGHT;
 
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
@@ -25,13 +22,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Camera mCamera;
     private FocusView focusView;
     private boolean focusViewSet;
-    private boolean videoRecording;
 
-    public CameraPreview(Context context, Camera camera, boolean isVideoRecording) {
+    public CameraPreview(Context context, Camera camera) {
         super(context);
         mCamera = camera;
-        videoRecording = isVideoRecording;
-
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
         mHolder = getHolder();
@@ -41,11 +35,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
-        if (videoRecording) {
-            setPreviewSizeForVideo();
-        } else {
-            setupCamera();
-        }
         // The Surface has been created, now tell the camera where to draw the preview.
         try {
             mCamera.setPreviewDisplay(holder);
@@ -53,26 +42,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } catch (IOException e) {
             Log.d(TAG, "Error setting camera preview: " + e.getMessage());
         }
-    }
-
-    public void setupCamera() {
-        //   parameters.setPreviewSize(1280, 960);
-        Log.d(TAG, "setPreviewSizeForVideo: ");
-        Camera.Parameters params = mCamera.getParameters();
-        Camera.Size size = params.getPictureSize();
-        float ratio = ((float) size.width) / ((float) size.height);
-        PictureSize pictureSize = CameraUtils.getPreviewSizeForRatio(ratio);
-        params.setPreviewSize(pictureSize.width(), pictureSize.height());
-        mCamera.setParameters(params);
-    }
-
-    public void setPreviewSizeForVideo() {
-        Log.d(TAG, "setPreviewSizeForVideo: !!!");
-        Camera.Parameters parameters = mCamera.getParameters();
-//        PictureSize pictureSize = CameraUtils.getPreviewSizeForRatio(ASPECT_RATIO_16_9);
-//        parameters.setPreviewSize(pictureSize.getWidth(), pictureSize.getHeight());
-        parameters.setPreviewSize(1280, 720);
-        mCamera.setParameters(parameters);
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {

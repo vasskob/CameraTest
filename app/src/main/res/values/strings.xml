@@ -19,23 +19,6 @@
     <string name="pref_header_resolution">Resolution &amp; quality </string>
 
     <string name="pref_title_social_recommendations">Save location</string>
-    <string name="pref_description_social_recommendations">
-    </string>
-
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
-
-    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-    </string-array>
 
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_about">About</string>
@@ -44,23 +27,6 @@
     <string name="pref_title_back_camera2_photo_quality">Back camera2 photo</string>
     <string name="pref_title_back_camera1_photo_quality">Back camera1 photo</string>
     <string name="pref_title_back_camera_photo_quality">Back camera photo</string>
-    <string-array name="pref_sync_frequency_titles">
-        <item>(4:3) 8.0 mpx</item>
-        <item>(4:3) 5.0 mpx</item>
-        <item>(4:3) 3.1 mpx</item>
-        <item>(16:9) 6.0 mpx</item>
-        <item>(16:9) 2.1 mpx</item>
-        <item>(16:9) 0.9 mpx</item>
-    </string-array>
-    <string-array name="pref_sync_frequency_values">
-        <item>8</item>
-        <item>5</item>
-        <item>3</item>
-        <item>6</item>
-        <item>2</item>
-        <item>-1</item>
-    </string-array>
-
     <string-array name="pref_jpeg_compression_title">
         <item>100%</item>
         <item>75%</item>
@@ -74,9 +40,7 @@
         <item>50</item>
         <item>25</item>
     </string-array>
-
     <string-array name="multi_select_list_preference_default_value"/>
-
     <string name="pref_title_system_sync_settings">System sync settings</string>
     <string name="about_title">myCamera \nfor Android</string>
     <string name="about_body"><b>myCamera</b> and the <b>myCamera</b> logos are trademarks of <b>myCamera Inc.</b> All rights reserved. \n\n<b>myCamera</b> for Android is built using open source software: \n<b>licenses</b>.</string>
@@ -90,5 +54,6 @@
     <string name="advanced_prefs">Advanced</string>
     <string name="pref_sound_on_off">Video sound recording</string>
     <string name="pref_location">Save location</string>
+    <string name="switch_btn">Switch camera button</string>
 
 </resources>

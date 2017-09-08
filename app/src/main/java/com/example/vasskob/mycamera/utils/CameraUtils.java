@@ -18,37 +18,26 @@ import java.util.Locale;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_15_9;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_15_9_STRING;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_16_9;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_16_9_STRING;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_18_9;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_18_9_STRING;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_4_3;
+import static com.example.vasskob.mycamera.utils.Constants.ASPECT_RATIO_4_3_STRING;
+import static com.example.vasskob.mycamera.utils.Constants.PICTURE_SIZE_KEY;
+import static com.example.vasskob.mycamera.utils.Constants.UNKNOWN;
 
 public class CameraUtils {
 
     private static final String TAG = CameraUtils.class.getSimpleName();
-    public static final String BACK_CAMERA_QUALITY = "back_camera_quality";
-    public static final String BACK_CAMERA_2_QUALITY = "back_camera2_quality";
-    public static final String FRONT_CAMERA_QUALITY = "front_camera_quality";
-    public static final String BACK_VIDEO_QUALITY = "back_video_quality";
-    public static final String FRONT_VIDEO_QUALITY = "front_video_quality";
-    public static final String JPEG_COMPRESSION = "jpeg_compression";
-    public static final String CAMERA_CATEGORY = "camera_category";
-    public static final String PHOTO_PATH = "PHOTO_PATH";
-
-    private static final String ASPECT_RATIO_4_3_STRING = "(4:3)";
-    private static final String ASPECT_RATIO_15_9_STRING = "(15:9)";
-    private static final String ASPECT_RATIO_16_9_STRING = "(16:9)";
-    private static final String ASPECT_RATIO_18_9_STRING = "(18:9)";
-
-    private static final float ASPECT_RATIO_4_3 = 1.3333334f;
-    private static final float ASPECT_RATIO_15_9 = 1.6666666f;
-    public static final float ASPECT_RATIO_16_9 = 1.7777778f;
-    private static final float ASPECT_RATIO_18_9 = 2.0f;
-
-    public static final String FOR_4K_UHD = "4K UHD";
-    public static final String UHD = "UHD";
-    public static final String FHD = "FHD";
-    public static final String HD = "HD";
-    public static final String SD = "SD";
-    public static final int FOCUS_VIEW_HEIGHT = 100;
-    private static final String PICTURE_SIZE_KEY = "picture";
-    public static final String UNKNOWN = "UNKNOWN";
+    private static final String DIRECTORY_NAME = "MyCameraApp";
+    private static final String PHOTO_SUFFIX = "IMG_";
+    private static final String VIDEO_SUFFIX = "VID_";
+    private static final String PHOTO_EXTENSION = ".jpg";
+    private static final String VIDEO_EXTENSION = ".mp4";
+    private static final String DATE_FORMAT_PATTERN = "yyyyMMdd_HHmmss";
 
     public static Camera getCameraInstance(int cameraId) {
         Camera c = null;
@@ -62,7 +51,7 @@ public class CameraUtils {
 
     public static File getOutputMediaFile(int type) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+                Environment.DIRECTORY_PICTURES), DIRECTORY_NAME);
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 Log.d("MyCameraApp", "failed to create directory");
@@ -70,14 +59,14 @@ public class CameraUtils {
             }
         }
         // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+        String timeStamp = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.US).format(new Date());
         File mediaFile;
         if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_" + timeStamp + ".jpg");
+                    PHOTO_SUFFIX + timeStamp + PHOTO_EXTENSION);
         } else if (type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_" + timeStamp + ".mp4");
+                    VIDEO_SUFFIX + timeStamp + VIDEO_EXTENSION);
         } else {
             return null;
         }

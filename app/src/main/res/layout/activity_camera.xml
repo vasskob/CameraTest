@@ -43,30 +43,44 @@
         android:id="@+id/btn_camera_switch"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginBottom="26dp"
-        android:layout_marginStart="26dp"
+        android:contentDescription="@string/switch_btn"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
         android:src="@drawable/front_back_switch_button_animation"
         app:layout_constraintBottom_toBottomOf="@+id/view_bottom"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <Button
-        android:id="@+id/btn_capture"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:layout_marginBottom="26dp"
-        android:background="@drawable/btn_selector"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/view_bottom"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/btn_capture_photo"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerInParent="true"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/photo_btn_selector"/>
+
+        <Button
+            android:id="@+id/btn_capture_video"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/video_btn_selector"/>
+    </android.support.v7.widget.LinearLayoutCompat>
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/iv_thumbnail"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginBottom="26dp"
-        android:layout_marginEnd="26dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         app:civ_border_color="#EEEEEE"
         app:civ_border_width="0.5dp"
         app:civ_shadow="true"

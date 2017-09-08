@@ -1,20 +1,22 @@
 package com.example.vasskob.mycamera.utils;
 
 import android.annotation.TargetApi;
+import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import static com.example.vasskob.mycamera.utils.CameraUtils.FHD;
-import static com.example.vasskob.mycamera.utils.CameraUtils.FOR_4K_UHD;
-import static com.example.vasskob.mycamera.utils.CameraUtils.HD;
-import static com.example.vasskob.mycamera.utils.CameraUtils.SD;
-import static com.example.vasskob.mycamera.utils.CameraUtils.UHD;
+import static com.example.vasskob.mycamera.utils.Constants.FHD;
+import static com.example.vasskob.mycamera.utils.Constants.FOR_4K_UHD;
+import static com.example.vasskob.mycamera.utils.Constants.HD;
+import static com.example.vasskob.mycamera.utils.Constants.SD;
+import static com.example.vasskob.mycamera.utils.Constants.UHD;
+import static com.example.vasskob.mycamera.utils.Constants.UNKNOWN;
 
 public class PictureSize implements Comparable<PictureSize>, Serializable {
 
-    public static final int MEGA_PIXEL = 1000000;
+    private static final int MEGA_PIXEL = 1000000;
     private final int height;
     private final int width;
 
@@ -75,12 +77,12 @@ public class PictureSize implements Comparable<PictureSize>, Serializable {
         return this.height >= this.width;
     }
 
-    public int compareTo(PictureSize size) {
+    public int compareTo(@NonNull PictureSize size) {
         return Float.compare(resolution(), size.resolution());
     }
 
     public String getVideoLabel() {
-        String label = CameraUtils.UNKNOWN;
+        String label = UNKNOWN;
         if (width >= 3840 && height >= 2160) {
             label = FOR_4K_UHD;
         }
