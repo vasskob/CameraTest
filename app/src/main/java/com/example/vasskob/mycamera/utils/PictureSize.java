@@ -23,14 +23,6 @@ public class PictureSize implements Comparable<PictureSize>, Serializable {
         this.height = height;
     }
 
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
-
     public int width() {
         return this.width;
     }
@@ -92,7 +84,7 @@ public class PictureSize implements Comparable<PictureSize>, Serializable {
         if (width == 3840 && height == 2160) {
             label = FOR_4K_UHD;
         }
-        if (width < 3840 && width > 1980 && height >= 1680) {
+        if (width < 3840 && width > 2880 && height >= 1680) {
             label = UHD;
         }
         if (width == 1920 && height == 1080) {

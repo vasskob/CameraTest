@@ -191,7 +191,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     String stringRatio = CameraUtils.getStringRatio(videoResSizes.get(i).aspectRatio());
                     if (!label.equals(CameraUtils.UNKNOWN)) {
                         entries[i] = stringRatio + " " + label + " " + videoResSizes.get(i).toString();
-                        entryValues[i] = Integer.toString(videoResSizes.get(i).getWidth()) + "x" + Integer.toString(videoResSizes.get(i).getHeight());
+                        entryValues[i] = Integer.toString(videoResSizes.get(i).width()) + "x" + Integer.toString(videoResSizes.get(i).height());
                     }
                 }
                 videoPref.setEntries(removeNullValue(entries));
@@ -242,7 +242,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 for (int i = 0; i < Math.min(cameraSizes.size(), RESOLUTION_COUNT); i++) {
                     String stringRatio = CameraUtils.getStringRatio(cameraSizes.get(i).aspectRatio());
                     entries[i] = stringRatio + "  " + cameraSizes.get(i).toString();
-                    entryValues[i] = Integer.toString(cameraSizes.get(i).getWidth()) + "x" + Integer.toString(cameraSizes.get(i).getHeight());
+                    entryValues[i] = Integer.toString(cameraSizes.get(i).width()) + "x" + Integer.toString(cameraSizes.get(i).height());
                 }
                 cameraPrefs.setEntries(entries);
                 cameraPrefs.setEntryValues(entryValues);

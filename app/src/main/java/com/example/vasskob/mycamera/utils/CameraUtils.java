@@ -100,16 +100,20 @@ public class CameraUtils {
 
     public static int getVideoQuality(String videoQuality) {
         switch (videoQuality) {
+            case "3360x1680":
+            case "3264x1836":
             case "2880x2160":
                 return CamcorderProfile.QUALITY_HIGH;
             case "1920x1080":
                 return CamcorderProfile.QUALITY_1080P;
             case "1280x720":
                 return CamcorderProfile.QUALITY_720P;
-            case "1280x480":
+            case "720x480":
                 return CamcorderProfile.QUALITY_480P;
+            case "640x480":
+                return CamcorderProfile.QUALITY_LOW;
             default:
-                return CamcorderProfile.QUALITY_1080P;
+                return CamcorderProfile.QUALITY_720P;
         }
     }
 

@@ -62,7 +62,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Camera.Size size = params.getPictureSize();
         float ratio = ((float) size.width) / ((float) size.height);
         PictureSize pictureSize = CameraUtils.getPreviewSizeForRatio(ratio);
-        params.setPreviewSize(pictureSize.getWidth(), pictureSize.getHeight());
+        params.setPreviewSize(pictureSize.width(), pictureSize.height());
         mCamera.setParameters(params);
     }
 
