@@ -104,12 +104,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         return super.onMenuItemSelected(featureId, item);
     }
 
-//    @Override
-//    public void onBackPressed() {
+    @Override
+    public void onBackPressed() {
 //        if (getFragmentManager().findFragmentById(com.android.internal.R.id.prefs) == null) {
 //            super.onBackPressed();
 //        } else finish();
-//    }
+        int count = getFragmentManager().getBackStackEntryCount();
+        Log.d(TAG, "onBackPressed: count " + count);
+        if (count == 0) {
+            super.onBackPressed();
+        } else {
+            getFragmentManager().popBackStack();
+        }
+    }
 
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
